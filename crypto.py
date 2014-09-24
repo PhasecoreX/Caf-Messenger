@@ -23,13 +23,23 @@
 #  
 
 from Crypto.PublicKey import RSA
+from Crypto import Random
 
 '''
 Generates a public/private 4096 bit RSA key
-Returns an RSA key object (_RSAobj)
+Returns an RSA key object (_RSAobj) containing the full key pair
 '''
-def generate_private_key():
+def generate_key_pair():
     return RSA.generate(4096)
+
+'''
+Extracts the public key from a full key pair
+Returns an RSA key object (_RSAobj) containing only the public key
+---
+private_key - RSA key object (_RSAobj) containing users private and public key
+'''
+def get_public_key(private_key):
+    return private_key.publickey()
 
 '''
 Saves key to encrypted user.pem file
@@ -40,7 +50,7 @@ location - Path of folder to save to
 ---
 NOT DONE YET!
 '''
-def save_key(key, location):
+def save_full_key(key, location):
     pubkey = key.publickey()
     keyfile = location + "user.pem"
     f = open(keyfile,'w')
@@ -56,7 +66,8 @@ pub_key   - RSA key object (_RSAobj) containing public key of recipient, used fo
 plaintext - Text to encrypt
 '''
 def encrypt_auth(pub_key, plaintext):
-    return pub_key.encrypt(plaintext)
+    rng = Random.new()
+    return pub_key.encrypt(plaintext, rng.read(8192))
 
 '''
 Decrypts data using RSA (used for authentication)

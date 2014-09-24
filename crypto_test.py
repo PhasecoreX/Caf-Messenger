@@ -23,3 +23,30 @@
 #  
 
 from crypto import *
+
+print "Generating key pair A..."
+keyA = generate_key_pair()
+print "Generating key pair B..."
+keyB = generate_key_pair()
+
+pubA = get_public_key(keyA)
+pubB = get_public_key(keyB)
+
+print "Adding 42+12..."
+print "Encrypting 42 with pubkey B..."
+encrypted_b = encrypt_auth(pubB, 42)
+print "Encrypting 12 with pubkey A..."
+encrypted_a = encrypt_auth(pubA, 12)
+
+print "Decrypting erncrypted_a with private key A..."
+numberA = decrypt_auth(keyA, encrypted_a)
+print "Decrypting erncrypted_b with private key B..."
+numberB = decrypt_auth(keyB, encrypted_b)
+
+print "Adding results..."
+result = numberA + numberB
+
+if (result==42+12):
+    print("Result is %s. Yay!" % (result))
+else:
+    print("Result is %s. Something went wrong..." % (result))
