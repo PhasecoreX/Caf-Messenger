@@ -16,89 +16,106 @@ import Tkinter as tk
 class MainFrame(tk.Tk):
 	def createPanels(self):
 		containerFrame = tk.Frame(self)
-		containerFrame.pack(side = "top", fill = "both", expand = True)
-		containerFrame.grid_rowconfigure(0, weight = 1)
-		containerFrame.grid_columnconfigure(0, weight = 1)
+		containerFrame.config(width = 800, height = 630)
+		containerFrame.place(x = 0, y = 0, anchor = "nw")
 		
-		friends = FriendsPanel(containerFrame, self)
-		friends.grid(row = 0, column = 2, columnspan = 1)
+		
+		#Create the menubar
+		menubar = tk.Menu(self)
+		
+		#Add a cascade list called filemenu
+		filemenu = tk.Menu(menubar, tearoff = 0)
+		filemenu.add_command(label = "Print")
+		filemenu.add_command(label = "Quit", command = self.quit)
+		
+		menubar.add_cascade(label = "File", menu = filemenu)
+		
+		#Display the menu
+		self.config(menu = menubar)
 		
 		chat = ChatPanel(containerFrame, self)
-		chat.grid(row = 0, column = 0, columnspan = 2)
+		chat.config(width = 590, height = 590)
+		chat.place(x = 5, y = 5, anchor = "nw")
+		
+		friends = FriendsPanel(containerFrame, self)
+		friends.config(width = 190, height = 590)
+		friends.place(x = 605, y = 5, anchor = "nw")
 		
 	
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.title("Cafe")
-		self.maxsize(800,600)
-		self.minsize(800,600)
+		self.maxsize(800,630)
+		self.minsize(800,630)
 		
 		self.createPanels()
-	
-	
 	
 
 class FriendsPanel(tk.Frame):
 	def createWidgets(self, controller):
-		self.label = tk.Label(self, text = "Test!").grid(row = 0, column = 0)
-		
+		self.flist.config(width = 190, height = 590)
+		self.flist.place(x = 0, y = 0, anchor = "nw")
 		
 	
 	def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
+		self.flist = tk.Text(self)
 		self.createWidgets(controller)
-		
-	
-	
-	
-	
 	
 
 class ChatPanel(tk.Frame):
 	def createWidgets(self, controller):
-		self.label["text"] = "Test!"
-		self.label.grid(row = 0, column = 0)
-		self.textArea.grid(row = 1, column = 0, rowspan = 3, columnspan = 3)
+		self.label.config(text = "Chat with \"Friend\":")
+		self.label.config(width = 570, height = 20)
+		self.label.place(x = 0, y = 0, anchor = "nw", width = 570, height = 20)
+		
+		self.textArea.config(width = 570,height = 495, state = "disabled")
+		self.textArea.place(x = 0, y = 25, anchor = "nw", width = 570,height = 495)
+		self.textArea.config(background = "lightgray", borderwidth = 2)
 		
 		self.sendButton["text"] = "Send"
-		self.sendButton.grid(row = 4, column = 2)
+		self.sendButton.config(command = self.buttonPress)
+		self.sendButton.config(width = 40, height = 20)
+		self.sendButton.place(x = 525, y = 535, anchor = "nw", width = 45, height = 40)
 		
-		self.textEntry.grid(row = 4, column = 0, columnspan = 2)
+		self.textEntry.config(width = 525)
+		self.textEntry.place(x = 0, y = 525, width = 515, height = 60)
+		self.textEntry.bind("<KeyPress-Return>", self.enterKeyPress)
+		#self.textEntry.bind("<KeyPress-Return>", self.enterKeyPress)
+		self.textEntry.bind("<Shift-Return>", self.shiftEnterPress)
+		#self.textArea.config(yscrollcommand = self.scrollbar.set)
+		#self.scrollbar.config(command = self.textArea.yview)
 		
-		self.textArea.config(yscrollcommand = self.scrollbar.set)
-		self.scrollbar.config(command = self.textArea.yview)
-		self.scrollbar.grid(row = 1, rowspan = 3, column = 4)
-		self.sendButton.config(command = lambda: self.buttonPress())
+	def shiftEnterPress(self, event):
+		self.textEntry.insert("end", "\n")
+		return 'break'
+	
+	def enterKeyRelease(self, event):
+		self.textEntry.delete(1.0, "end")
+	
+	def enterKeyPress(self, event):
+		self.buttonPress()
+		self.textEntry.delete(1.0, "end")
+		return 'break'
 		
 	
 	def buttonPress(self):
+		self.textArea.config(state = "normal")
 		self.textArea.insert("end", "Client: ")
-		self.textArea.insert("end", self.textEntry.get())
-		self.textArea.insert("end", "\n")
-		self.textEntry.delete(0, "end")
-		
-		
-		
-		
-		
-		
+		self.textArea.insert("end", self.textEntry.get(1.0, "end"))
+		self.textArea.see("end")
+		self.textArea.config(state = "disabled")
+		self.textEntry.delete(1.0, "end")
 	
 	def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
 		self.label = tk.Label(self)
 		self.textArea = tk.Text(self)
 		self.sendButton = tk.Button(self)
-		self.textEntry = tk.Entry(self)
-		self.scrollbar = tk.Scrollbar(self)
+		self.textEntry = tk.Text(self)
+		#self.scrollbar = tk.Scrollbar(self)
 		self.createWidgets(controller)
-		
 	
-
-	
-	
-	
-	
-
 if __name__ == "__main__":
 	top = MainFrame()
 	top.mainloop()
