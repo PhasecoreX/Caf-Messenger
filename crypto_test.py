@@ -24,29 +24,108 @@
 
 from crypto import *
 
-print "Generating key pair A..."
-keyA = generate_key_pair()
-print "Generating key pair B..."
-keyB = generate_key_pair()
+def bad_sign_test():
+    print "Generating key pair A..."
+    keyA = generate_key_pair()
+    print "Generating key pair B..."
+    keyB = generate_key_pair()
 
-pubA = get_public_key(keyA)
-pubB = get_public_key(keyB)
+    pubB = get_public_key(keyB)
+    
+    data = "Signing sample text with key A..."
+    
+    print data
+    signature = sign(keyA, data)
+    
+    print "Checking signature with key B (should be false)..."
+    result = unsign(pubB, data, signature)
+    
+    print result
 
-print "Adding 42+12..."
-print "Encrypting 42 with pubkey B..."
-encrypted_b = encrypt_auth(pubB, 42)
-print "Encrypting 12 with pubkey A..."
-encrypted_a = encrypt_auth(pubA, 12)
+def sign_test():
+    print "Generating key pair..."
+    keyA = generate_key_pair()
+    pubA = get_public_key(keyA)
+    
+    data = "Signing sample text..."
+    
+    print data
+    signature = sign(keyA, data)
+    
+    print "Checking signature..."
+    result = unsign(pubA, data, signature)
+    
+    print result
 
-print "Decrypting erncrypted_a with private key A..."
-numberA = decrypt_auth(keyA, encrypted_a)
-print "Decrypting erncrypted_b with private key B..."
-numberB = decrypt_auth(keyB, encrypted_b)
+def load_key_sign_test():
+    print "Loading mykey.pem..."
+    keyA = load_key("mykey.pem")
+    pubA = get_public_key(keyA)
+    
+    data = "Signing sample text..."
+    
+    print data
+    signature = sign(keyA, data)
+    
+    print "Checking signature..."
+    result = unsign(pubA, data, signature)
+    
+    print result
 
-print "Adding results..."
-result = numberA + numberB
+def bad_encrypt_test():
+    print "Generating key pair A..."
+    keyA = generate_key_pair()
+    print "Generating key pair B..."
+    keyB = generate_key_pair()
+    
+    pubA = get_public_key(keyA)
+    pubB = get_public_key(keyB)
+    
+    print "Adding 42+12..."
+    print "Encrypting 42 with pubkey B..."
+    encrypted_b = encrypt_auth(pubB, 42)
+    print "Encrypting 12 with pubkey A..."
+    encrypted_a = encrypt_auth(pubA, 12)
+    
+    print "Decrypting encrypted_a with private key B (should fail)..."
+    numberA = decrypt_auth(keyB, encrypted_a)
+    print "Decrypting encrypted_b with private key A (should fail)..."
+    numberB = decrypt_auth(keyA, encrypted_b)
+    
+    print "Adding results..."
+    result = numberA + numberB
+    
+    if (result==42+12):
+        print("Result is %s. Something went wrong..." % (result))
+    else:
+        print("Result is %s. Yay!" % (result))
 
-if (result==42+12):
-    print("Result is %s. Yay!" % (result))
-else:
-    print("Result is %s. Something went wrong..." % (result))
+def encrypt_test():
+    print "Generating key pair A..."
+    keyA = generate_key_pair()
+    print "Generating key pair B..."
+    keyB = generate_key_pair()
+    
+    pubA = get_public_key(keyA)
+    pubB = get_public_key(keyB)
+    
+    print "Adding 42+12..."
+    print "Encrypting 42 with pubkey B..."
+    encrypted_b = encrypt_auth(pubB, 42)
+    print "Encrypting 12 with pubkey A..."
+    encrypted_a = encrypt_auth(pubA, 12)
+    
+    print "Decrypting encrypted_a with private key A..."
+    numberA = decrypt_auth(keyA, encrypted_a)
+    print "Decrypting encrypted_b with private key B..."
+    numberB = decrypt_auth(keyB, encrypted_b)
+    
+    print "Adding results..."
+    result = numberA + numberB
+    
+    if (result==42+12):
+        print("Result is %s. Yay!" % (result))
+    else:
+        print("Result is %s. Something went wrong..." % (result))
+
+load_key_sign_test()

@@ -23,7 +23,11 @@
 #  
 
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
 from Crypto import Random
+from Crypto.Signature import PKCS1_PSS
+from Crypto.Hash import SHA
+from atk import Text
 
 '''
 Generates a public/private 4096 bit RSA key
@@ -43,7 +47,7 @@ def get_public_key(private_key):
 
 '''
 Saves key to encrypted user.pem file
-Returns 1 on success, 0 otherwise
+Returns True on success, False otherwise
 ---
 key      - RSA key object (_RSAobj) to write to disk
 location - Path of folder to save to
@@ -57,6 +61,15 @@ def save_full_key(key, location):
     f.write(key.exportKey('PEM') + "\n" + pubkey.exportKey('PEM'))
     f.close()
     return 1
+
+'''
+Loads key from .pem file
+Returns RSA key object (_RSAobj) containing 
+---
+file - Full path and file name of .pem key
+'''
+def load_key(file_path):
+    return RSA.importKey(open(file_path).read())
 
 '''
 Encrypts data using RSA key (used for authentication)
@@ -78,3 +91,41 @@ ciphertext  - Tuple list(?) representing encrypted message
 '''
 def decrypt_auth(private_key, ciphertext):
     return private_key.decrypt(ciphertext)
+
+'''
+Signs data
+Returns signature for given data and private key
+---
+private_key - RSA key object (_RSAobj) containing users private key, used for signing
+data        - Data to sign
+'''
+def sign(private_key, data):
+    h = SHA.new()
+    h.update(data)
+    signer = PKCS1_PSS.new(private_key)
+    return signer.sign(h)
+
+'''
+Checks signature on data
+Returns True if authentic, False otherwise
+---
+public_key - RSA key object (_RSAobj) containing signers public key
+data       - Signed data in question
+signature  - Proposed signature to test
+'''
+def unsign(public_key, data, signature):
+    h = SHA.new()
+    h.update(data)
+    signer = PKCS1_PSS.new(public_key)
+    return signer.verify(h, signature)
+
+'''
+Encrypts data using AES Cipher
+Returns encrypted Text
+---
+
+'''
+def encrypt_message(key, message):
+    iv = Random.new().read(AES.block_size)
+    cipher = AES.new(key, AES.MODE_CFB, iv)
+    return iv + cipher.encrypt(b'Attack at dawn')
