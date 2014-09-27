@@ -28,20 +28,44 @@ class MainFrame(tk.Tk):
 		filemenu.add_command(label = "Print")
 		filemenu.add_command(label = "Quit", command = self.quit)
 		
+		#Add a cascade list called editmenu
+		editmenu = tk.Menu(menubar, tearoff = 0)
+		editmenu.add_command(label = "Copy")
+		editmenu.add_command(label = "Paste")
+		editmenu.add_command(label = "Select All")
+		
+		#Add a cascade list called viewmenu
+		viewmenu = tk.Menu(menubar, tearoff = 0)
+		viewmenu.add_command(label = "View RSA Key Chain")
+		viewmenu.add_command(label = "View Current Chat's Public Key")
+		
+		#Add a cascade list called helpmenu
+		helpmenu = tk.Menu(menubar, tearoff = 0)
+		helpmenu.add_command(label = "About Cafe")
+		helpmenu.add_command(label = "About Encryption")
+		helpmenu.add_command(label = "About Distributed Systems")
+		
+		#Add all the cascade menus to the main menubar
 		menubar.add_cascade(label = "File", menu = filemenu)
+		menubar.add_cascade(label = "Edit", menu = editmenu)
+		menubar.add_cascade(label = "View", menu = viewmenu)
+		menubar.add_cascade(label = "Help", menu = helpmenu)
 		
 		#Display the menu
 		self.config(menu = menubar)
 		
+		#Create and place the Chat Panel
 		chat = ChatPanel(containerFrame, self)
 		chat.config(width = 590, height = 590)
 		chat.place(x = 5, y = 5, anchor = "nw")
 		
+		#Create and place the Friends List
 		friends = FriendsPanel(containerFrame, self)
 		friends.config(width = 190, height = 590)
 		friends.place(x = 605, y = 5, anchor = "nw")
 		
 	
+	#Main constructor
 	def __init__(self, *args, **kwargs):
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.title("Cafe")
@@ -53,19 +77,71 @@ class MainFrame(tk.Tk):
 
 class FriendsPanel(tk.Frame):
 	def createWidgets(self, controller):
-		self.flist.config(width = 190, height = 590)
-		self.flist.place(x = 0, y = 0, anchor = "nw")
+		self.fheader.config(text = "_ClientName_'s Friendlist")
+		self.fheader.config(width = 185, height = 20)
+		self.fheader.place(x = 0, y = 0, anchor = "nw", width = 185, height = 20)
+		
+		self.flist.config(width = 185, height = 505)
+		self.flist.place(x = 0, y = 25, anchor = "nw", width = 185, height = 505)
+		
+		self.friendEntry.config(width = 90, height = 20)
+		self.friendEntry.place(x = 0, y = 535, anchor = "nw", width = 90, height = 20)
+		
+		self.addButton.config(text = "Add Friend", width = 90, height = 20)
+		self.addButton.config(command = self.addButtonPress)
+		self.addButton.place(x = 95, y = 535, anchor = "nw", width = 90, height = 20)
+		
+		self.chatButton.config(text = "Chat", width = 90, height = 20)
+		self.chatButton.config(command = self.chatButtonPress)
+		self.chatButton.place(x = 0, y = 560, anchor = "nw", width = 90, height = 20)
+		
+		self.removeButton.config(text = "Remove", width = 90, height = 20)
+		self.removeButton.config(command = self.removeButtonPress)
+		self.removeButton.place(x = 95, y = 560, anchor = "nw", width = 90, height = 20)
+		
+		
+	
+	def addButtonPress(self):
+		print "Such Friend! Very wow."
+		
+		
+		
+		
+		
+		
+	
+	def chatButtonPress(self):
+		print "So chatty, much talk."
+		
+		
+		
+		
+		
+		
+	
+	def removeButtonPress(self):
+		print "How mean, no friend."
+		
+		
+		
+		
+		
 		
 	
 	def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
-		self.flist = tk.Text(self)
+		self.fheader = tk.Label(self)
+		self.flist = tk.Listbox(self)
+		self.addButton = tk.Button(self)
+		self.removeButton = tk.Button(self)
+		self.friendEntry = tk.Text(self)
+		self.chatButton = tk.Button(self)
 		self.createWidgets(controller)
 	
 
 class ChatPanel(tk.Frame):
 	def createWidgets(self, controller):
-		self.label.config(text = "Chat with \"Friend\":")
+		self.label.config(text = "Chat with _FriendName_:")
 		self.label.config(width = 570, height = 20)
 		self.label.place(x = 0, y = 0, anchor = "nw", width = 570, height = 20)
 		
@@ -94,8 +170,10 @@ class ChatPanel(tk.Frame):
 		self.textEntry.delete(1.0, "end")
 	
 	def enterKeyPress(self, event):
+		t = self.textEntry.get(1.0, "end")
+		if(t == "\n"):
+			return 'break'
 		self.buttonPress()
-		self.textEntry.delete(1.0, "end")
 		return 'break'
 		
 	
