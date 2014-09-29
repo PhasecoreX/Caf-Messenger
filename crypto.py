@@ -27,7 +27,6 @@ from Crypto.Cipher import AES
 from Crypto import Random
 from Crypto.Signature import PKCS1_PSS
 from Crypto.Hash import SHA
-from atk import Text
 
 '''
 Generates a public/private 4096 bit RSA key
@@ -45,6 +44,9 @@ private_key - RSA key object (_RSAobj) containing users private and public key
 def get_public_key(private_key):
     return private_key.publickey()
 
+def get_public_key_string(private_key):
+    return private_key.publickey().exportKey('PEM')
+
 '''
 Saves key to encrypted user.pem file
 Returns True on success, False otherwise
@@ -54,11 +56,10 @@ location - Path of folder to save to
 ---
 NOT DONE YET!
 '''
-def save_full_key(key, location):
-    pubkey = key.publickey()
-    keyfile = location + "user.pem"
-    f = open(keyfile,'w')
-    f.write(key.exportKey('PEM') + "\n" + pubkey.exportKey('PEM'))
+def save_full_key(key, keyfile_path, password):
+    exportedKey = key.exportKey('PEM', password, pkcs=1)
+    f = open(keyfile_path,'w')
+    f.write(exportedKey)
     f.close()
     return 1
 
@@ -68,8 +69,8 @@ Returns RSA key object (_RSAobj) containing
 ---
 file - Full path and file name of .pem key
 '''
-def load_key(file_path):
-    return RSA.importKey(open(file_path).read())
+def load_key(keyfile_path, password):
+    return RSA.importKey(open(keyfile_path).read(), password)
 
 '''
 Encrypts data using RSA key (used for authentication)
