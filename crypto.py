@@ -123,9 +123,26 @@ def unsign(public_key, data, signature):
 Encrypts data using AES Cipher
 Returns encrypted Text
 ---
-
+key     - Key used for encrypting. Keys can be 128, 192, or 256 bits long (we will use 256)
+message - Message to encrypt
 '''
 def encrypt_message(key, message):
     iv = Random.new().read(AES.block_size)
     cipher = AES.new(key, AES.MODE_CFB, iv)
-    return iv + cipher.encrypt(b'Attack at dawn')
+    pad_len = AES.block_size - (len(message) % AES.block_size)
+    padding = ''.join([chr(pad_len)]*pad_len)
+    return iv + cipher.encrypt(message + padding)
+
+'''
+Decrypts data using AES Cipher
+Returns decrypted Text. Keys can be 128, 192, or 256 bits long (we will use 256)
+---
+key        - Key used for decrypting
+ciphertext - Message to decrypt
+'''
+def decrypt_message(key, ciphertext):
+    iv = ciphertext[:AES.block_size]
+    cipher = AES.new(key, AES.MODE_CFB, iv)
+    padded_msg = cipher.decrypt(ciphertext[AES.block_size:])
+    pad_len = ord(padded_msg[-1])
+    return padded_msg[:len(padded_msg)-pad_len]

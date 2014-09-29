@@ -98,7 +98,7 @@ def bad_encrypt_test():
     if (result==42+12):
         print("Result is %s. Something went wrong..." % (result))
     else:
-        print("Result is %s. Yay!" % (result))
+        print("Result is %s. Yay! We need to figure out how to detect incorrect keys..." % (result))
 
 def encrypt_test():
     print "Generating key pair A..."
@@ -128,4 +128,10 @@ def encrypt_test():
     else:
         print("Result is %s. Something went wrong..." % (result))
 
-load_key_sign_test()
+def sym_cipher_test():
+    key = b'0123456789012345'
+    encrypted = encrypt_message(key, "Test")
+    print encrypted
+    print decrypt_message(key, encrypted)
+
+sym_cipher_test()
