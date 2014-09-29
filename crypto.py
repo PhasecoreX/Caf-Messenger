@@ -58,10 +58,13 @@ NOT DONE YET!
 '''
 def save_full_key(key, keyfile_path, password):
     exportedKey = key.exportKey('PEM', password, pkcs=1)
-    f = open(keyfile_path,'w')
-    f.write(exportedKey)
-    f.close()
-    return 1
+    try:
+        f = open(keyfile_path,'w')
+        f.write(exportedKey)
+        f.close()
+        return True
+    except:
+        return False
 
 '''
 Loads key from .pem file
@@ -70,7 +73,10 @@ Returns RSA key object (_RSAobj) containing
 file - Full path and file name of .pem key
 '''
 def load_key(keyfile_path, password):
-    return RSA.importKey(open(keyfile_path).read(), password)
+    try:
+        return RSA.importKey(open(keyfile_path).read(), password)
+    except:
+        raise
 
 '''
 Encrypts data using RSA key (used for authentication)

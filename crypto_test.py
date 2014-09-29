@@ -84,7 +84,7 @@ def save_key_sign_test():
     print "Saving key with password 'hello'..."
     save_full_key(keyA, "/home/ryan/Desktop/user.pem", "hello")
     
-    print "Loading key with password 'hello'..."
+    print "Loading key with password 'hell'..."
     keyB = load_key("/home/ryan/Desktop/user.pem", "hello")
     pubB = get_public_key(keyB)
     
@@ -93,6 +93,31 @@ def save_key_sign_test():
     
     print result
     
+def save_key_wrong_pass_test():
+    print "Generating key pair..."
+    keyA = generate_key_pair()
+    
+    data = "Signing sample text..."
+    
+    print data
+    signature = sign(keyA, data)
+    
+    print "Saving key with password 'hello'..."
+    save_full_key(keyA, "/home/ryan/Desktop/user.pem", "hello")
+    
+    print "Loading key with password 'hell'..."
+    try:
+        keyB = load_key("/home/ryan/Desktop/user.pem", "hell")
+    except:
+        print "Incorrect password..."
+        return 'break'
+    
+    pubB = get_public_key(keyB)
+    
+    print "Checking signature..."
+    result = unsign(pubB, data, signature)
+    
+    print result
 
 def bad_encrypt_test():
     print "Generating key pair A..."
@@ -157,11 +182,11 @@ def sym_cipher_test():
     print decrypt_message(key, encrypted)
 
 def get_public_key_test():
-    print "Generating key pair A..."
+    print "Generating key pair..."
     keyA = generate_key_pair()
     
     print "Public key:"
     print get_public_key_string(keyA)
 
-get_public_key_test()
+save_key_wrong_pass_test()
 
