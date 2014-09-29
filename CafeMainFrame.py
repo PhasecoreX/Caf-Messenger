@@ -86,6 +86,7 @@ class FriendsPanel(tk.Frame):
 		
 		self.friendEntry.config(width = 90, height = 20)
 		self.friendEntry.place(x = 0, y = 535, anchor = "nw", width = 90, height = 20)
+		self.friendEntry.bind("<Return>", self.enterKeyPress)
 		
 		self.addButton.config(text = "Add Friend", width = 90, height = 20)
 		self.addButton.config(command = self.addButtonPress)
@@ -102,13 +103,16 @@ class FriendsPanel(tk.Frame):
 		
 	
 	def addButtonPress(self):
-		print "Such Friend! Very wow."
+		print "Such Friend! Wow."
+		self.flist.insert("end", self.friendEntry.get(1.0, "end"))
+		self.friendEntry.delete(1.0, "end")
 		
-		
-		
-		
-		
-		
+	
+	def enterKeyPress(self, event):
+		return 'break'
+	
+	
+	
 	
 	def chatButtonPress(self):
 		print "So chatty, much talk."
@@ -120,7 +124,8 @@ class FriendsPanel(tk.Frame):
 		
 	
 	def removeButtonPress(self):
-		print "How mean, no friend."
+		self.flist.delete("anchor")
+		print "How mean, such enemy."
 		
 		
 		
