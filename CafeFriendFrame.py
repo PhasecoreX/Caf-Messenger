@@ -1,25 +1,18 @@
-# CIS 467 Capstone Project - Cafe Messenger
-#
-# This will be the container for the main prototype window.
-# It will simply feature a friend's list on the right side,
-# and the chat window on the left side. I'm considering
-# having every friend opened to have its own independent 
-# frame, but that may be implemented later in the long run.
-#
-#
-#
-#
-#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#	CIS 467 Capstone Project - Cafe Messenger
+#	CafeFriendFrame.py
+#	Author: Michael Currie
+#	
+#	This program is the GUI Frame for the friends list for the current user. It
+#	will be the main controller for CafeChatFrame, CafeAddFriendFrame, and many
+#	of the help and about pages.
+#	
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import Tkinter as tk
 
 class MainFrame(tk.Tk):
 	def createPanels(self):
-		containerFrame = tk.Frame(self)
-		containerFrame.config(width = 800, height = 630)
-		containerFrame.place(x = 0, y = 0, anchor = "nw")
-		
-		
 		#Create the menubar
 		menubar = tk.Menu(self)
 		
@@ -55,7 +48,7 @@ class MainFrame(tk.Tk):
 		self.config(menu = menubar)
 		
 		#Create and place the Friends List
-		friends = FriendsPanel(containerFrame, self)
+		friends = FriendsPanel(self, self)
 		friends.config(width = 190, height = 600)
 		friends.place(x = 5, y = 5, anchor = "nw")
 		

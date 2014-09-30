@@ -1,3 +1,16 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#	CIS 467 Capstone Project - Cafe Messenger
+#	CafeChatFrame.py
+#	Author: Michael Currie
+#	
+#	This program is the main GUI frame for the chat functionality of Cafe. This
+#	frame will be communicating with the Cryptography and Networking portions
+#	of the project, using Symmetric encryption and a peer-to-peer connection.
+#	
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+import Tkinter as tk
+
 class ChatPanel(tk.Frame):
 	def createWidgets(self, controller):
 		self.label.config(text = "Chat with _FriendName_:")
@@ -16,10 +29,7 @@ class ChatPanel(tk.Frame):
 		self.textEntry.config(width = 525)
 		self.textEntry.place(x = 0, y = 525, width = 515, height = 60)
 		self.textEntry.bind("<KeyPress-Return>", self.enterKeyPress)
-		#self.textEntry.bind("<KeyPress-Return>", self.enterKeyPress)
 		self.textEntry.bind("<Shift-Return>", self.shiftEnterPress)
-		#self.textArea.config(yscrollcommand = self.scrollbar.set)
-		#self.scrollbar.config(command = self.textArea.yview)
 		
 	def shiftEnterPress(self, event):
 		self.textEntry.insert("end", "\n")
@@ -50,5 +60,4 @@ class ChatPanel(tk.Frame):
 		self.textArea = tk.Text(self)
 		self.sendButton = tk.Button(self)
 		self.textEntry = tk.Text(self)
-		#self.scrollbar = tk.Scrollbar(self)
 		self.createWidgets(controller)
