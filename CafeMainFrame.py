@@ -15,6 +15,13 @@ from CafeFriendFrameS1 import FriendsPanel
 from CafeChatFrameS1 import ChatPanel
 import Tkinter as tk
 
+from twisted.internet.protocol import Protocol, Factory 
+from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
+from twisted.internet import tksupport, reactor, protocol
+
+from sys import stdout
+
+PORT = 1025
 
 class MainFrame(tk.Tk):
     """
@@ -69,6 +76,9 @@ class MainFrame(tk.Tk):
         
         """
         return self.chat.get_entry_text()
+    
+    def quit(self):
+        reactor.stop()
 
     def append_message(self, name, message):
         """This method sends a message and name to the chat panel.
@@ -98,13 +108,17 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
         
         """
-        print "whoo!"
+        
+        self.d.addCallback(lambda p: p.sendMessage(message))
 
     def __init__(self, controller, factory, *args, **kwargs):
         """
         """
         tk.Tk.__init__(self, *args, **kwargs)
+
         self.factory = factory
+        self.point = TCP4ClientEndpoint(reactor, "", PORT)
+        self.d = connectProtocol(self.point, Greeter())
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = tk.Menu(self)
@@ -119,8 +133,28 @@ class MainFrame(tk.Tk):
         self.maxsize(800, 630)
         self.minsize(800, 630)
 
+        self.protocol('WM_DELETE_WINDOW', self.quit)
         self.create_panels()
 
+class Greeter(Protocol):
+    def dataRecieved(self, data):
+        print "Data Received:"
+        print str(data)
+        stdout.write(data)
+
+    def sendMessage(self, msg):
+        print "Data Sent:"
+        print str(msg)
+        self.transport.write(msg.encode("utf-8"))
+
+class GreeterFactory(Factory):
+    def buildProtocol(self, addr):
+        return Greeter()
+    
+
 if __name__ == "__main__":
-    top = MainFrame(None, None)
-    top.mainloop()
+    factory = GreeterFactory()
+    top = MainFrame(None, factory)
+    # top.mainloop()
+    tksupport.install(top)
+    reactor.run()
