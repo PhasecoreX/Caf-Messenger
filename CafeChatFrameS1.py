@@ -80,7 +80,7 @@ class ChatPanel(tk.Frame):
         its own callback method to send to the controller.
         
         """
-        self.send(self.parent, self.factory)
+        self.send(self.textentry.get(1.0, "end"))
         self.textarea.config(state="normal")
         self.textarea.insert("end", "Client: ")
         self.textarea.insert("end", self.textentry.get(1.0, "end"))
