@@ -22,10 +22,10 @@
 #
 #
 
-'''crypto.py
+"""crypto.py
 
 A bunch of functions for encryption in Cafe Messenger
-'''
+"""
 
 from Crypto import Random
 from Crypto.Cipher import AES
@@ -99,7 +99,7 @@ def save_full_key(key, keyfile_path, password):
 
 
 def load_key(keyfile_path, password):
-    '''Loads key from .pem file
+    """Loads key from .pem file
 
     Will work with both public and private key files
 
@@ -108,7 +108,7 @@ def load_key(keyfile_path, password):
 
     Returns:
         RSA key object (_RSAobj) containing public and/or private key
-    '''
+    """
     try:
         return RSA.importKey(open(keyfile_path).read(), password)
     except:
@@ -116,7 +116,7 @@ def load_key(keyfile_path, password):
 
 
 def encrypt_auth(pub_key, plaintext):
-    '''Encrypts data using RSA key (used for authentication)
+    """Encrypts data using RSA key (used for authentication)
 
     Args:
         pub_key:   RSA key object (_RSAobj) containing public key of recipient,
@@ -124,14 +124,14 @@ def encrypt_auth(pub_key, plaintext):
         plaintext: Text to encrypt
 
     Returns:
-        Encrypted result asymmetric key - tuple list(?)
-    '''
+        Encrypted result asymmetric key (tuple list(?)
+    """
     rng = Random.new()
     return pub_key.encrypt(plaintext, rng.read(8192))
 
 
 def decrypt_auth(private_key, ciphertext):
-    '''Decrypts data using RSA (used for authentication)
+    """Decrypts data using RSA (used for authentication)
 
     Args:
         private_key: RSA key object (_RSAobj) containing users private key,
@@ -139,13 +139,13 @@ def decrypt_auth(private_key, ciphertext):
         ciphertext:  Tuple list(?) representing encrypted message
 
     Returns:
-        Decrypted message - string
-    '''
+        Decrypted message (string)
+    """
     return private_key.decrypt(ciphertext)
 
 
 def sign(private_key, data):
-    '''Signs data
+    """Signs data
 
     Args:
         private_key: RSA key object (_RSAobj) containing users private key,
@@ -153,16 +153,16 @@ def sign(private_key, data):
         data:        Data to sign
 
     Returns:
-        Signature for given data and private key
-    '''
+        Signature for given data
+    """
     hash_obj = SHA.new()
     hash_obj.update(data)
     signer = PKCS1_PSS.new(private_key)
     return signer.sign(hash_obj)
 
 
-def unsign(public_key, data, signature):
-    '''Checks signature on data
+def verify(public_key, data, signature):
+    """Checks signature on data
 
     Args:
         public_key: RSA key object (_RSAobj) containing signers public key
@@ -171,7 +171,7 @@ def unsign(public_key, data, signature):
 
     Returns:
         True if authentic, False otherwise
-    '''
+    """
     hash_obj = SHA.new()
     hash_obj.update(data)
     signer = PKCS1_PSS.new(public_key)
@@ -179,7 +179,7 @@ def unsign(public_key, data, signature):
 
 
 def encrypt_message(key, message):
-    '''Encrypts data using AES Cipher
+    """Encrypts data using AES Cipher
 
     Args:
         key:     Key used for encrypting.
@@ -187,8 +187,8 @@ def encrypt_message(key, message):
         message: Message to encrypt
 
     Returns:
-        Encrypted Text
-    '''
+        Encrypted Text (string)
+    """
     logging.debug('Plaintext to be encrypted:/n%s', message)
     iv_random = Random.new().read(AES.block_size)
     cipher = AES.new(key, AES.MODE_CFB, iv_random)
@@ -200,16 +200,16 @@ def encrypt_message(key, message):
 
 
 def decrypt_message(key, ciphertext):
-    '''Decrypts data using AES Cipher
+    """Decrypts data using AES Cipher
 
     Args:
         key:        Key used for decrypting
+                    Keys can be 128, 192, or 256 bits long (we will use 256)
         ciphertext: Message to decrypt
 
     Returns:
-        Decrypted Text
-        Keys can be 128, 192, or 256 bits long (we will use 256)
-    '''
+        Decrypted Text (string)
+    """
     logging.debug('Ciphertext to be decrypted:/n%s', ciphertext)
     iv_random = ciphertext[:AES.block_size]
     cipher = AES.new(key, AES.MODE_CFB, iv_random)

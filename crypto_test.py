@@ -22,10 +22,15 @@
 #
 #
 
+"""crypto_test.py
+
+For testing crypto.py
+"""
 from crypto import *
 
 
 def bad_sign_test():
+    """ Test if signing fails when it should"""
     print "Generating key pair A..."
     key_a = generate_key_pair()
     print "Generating key pair B..."
@@ -39,12 +44,13 @@ def bad_sign_test():
     signature = sign(key_a, data)
 
     print "Checking signature with key B (should be false)..."
-    result = unsign(pub_b, data, signature)
+    result = verify(pub_b, data, signature)
 
     print result
 
 
 def sign_test():
+    """Test if signing works"""
     print "Generating key pair..."
     key_a = generate_key_pair()
     pub_a = get_public_key(key_a)
@@ -55,12 +61,13 @@ def sign_test():
     signature = sign(key_a, data)
 
     print "Checking signature..."
-    result = unsign(pub_a, data, signature)
+    result = verify(pub_a, data, signature)
 
     print result
 
 
 def save_key_sign_test():
+    """Signs, saves key to disk, loads key, verifies"""
     print "Generating key pair..."
     key_a = generate_key_pair()
 
@@ -77,12 +84,13 @@ def save_key_sign_test():
     pub_b = get_public_key(key_b)
 
     print "Checking signature..."
-    result = unsign(pub_b, data, signature)
+    result = verify(pub_b, data, signature)
 
     print result
 
 
 def save_key_wrong_pass_test():
+    """Try loading a key with the wrong password"""
     print "Generating key pair..."
     key_a = generate_key_pair()
 
@@ -104,12 +112,13 @@ def save_key_wrong_pass_test():
     pub_b = get_public_key(key_b)
 
     print "Checking signature..."
-    result = unsign(pub_b, data, signature)
+    result = verify(pub_b, data, signature)
 
     print result
 
 
 def bad_encrypt_test():
+    """Decrypt with wrong key"""
     print "Generating key pair A..."
     key_a = generate_key_pair()
     print "Generating key pair B..."
@@ -132,8 +141,8 @@ def bad_encrypt_test():
     print "Adding results..."
     result = number_a + number_b
 
-    if (result == 42 + 12):
-        print("Result is %s. Something went wrong..." % (result))
+    if result == 42 + 12:
+        print "Result is %s. Something went wrong..." % (result)
     else:
         print(
             "Result is %s. Yay! "
@@ -141,6 +150,7 @@ def bad_encrypt_test():
 
 
 def encrypt_test():
+    """Encrypt and decrypt RSA test"""
     print "Generating key pair A..."
     key_a = generate_key_pair()
     print "Generating key pair B..."
@@ -170,6 +180,7 @@ def encrypt_test():
 
 
 def sym_cipher_test():
+    """Encrypt and decrypt AES"""
     key = b'0123456789012345'
     encrypted = encrypt_message(key, "Test")
     print encrypted
@@ -177,6 +188,7 @@ def sym_cipher_test():
 
 
 def get_public_key_test():
+    """Display public key"""
     print "Generating key pair..."
     key_a = generate_key_pair()
 
