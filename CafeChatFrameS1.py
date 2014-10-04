@@ -69,8 +69,8 @@ class ChatPanel(tk.Frame):
         self.textarea.delete(1.0, "end")
         self.textarea.config(state="disabled")
 
-    def send(self, parent, factory):
-        print "Whoo!"
+    def send(self, message):
+        self.parent.send(message)
         
 
     def send_button_pressed(self):
@@ -80,10 +80,6 @@ class ChatPanel(tk.Frame):
         its own callback method to send to the controller.
         
         """
-        
-        ###
-        
-        
         self.send(self.parent, self.factory)
         self.textarea.config(state="normal")
         self.textarea.insert("end", "Client: ")

@@ -87,7 +87,7 @@ class MainFrame(tk.Tk):
         """
         self.chat.change_chat_name(name)
 
-    def send_message(self, message):
+    def send(self, message):
         """This method receives a message from its chat child and forwards it.
         
         This is a callback chain specific method. It will receive a message
@@ -98,7 +98,7 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
         
         """
-        self.controller.send_message(message)
+        print "whoo!"
 
     def __init__(self, controller, factory, *args, **kwargs):
         """
