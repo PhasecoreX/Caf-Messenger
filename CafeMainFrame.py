@@ -63,31 +63,57 @@ class MainFrame(tk.Tk):
         self.friends.place(x=605, y=5, anchor="nw")
 
     def get_entry_text(self):
+        """This method gets the text out of the entrytext widget of chat.
+        
+        Invokes the get_entry_text method of the ChatPanel 
+        
+        """
         return self.chat.get_entry_text()
 
     def append_message(self, name, message):
-        """
+        """This method sends a message and name to the chat panel.
+        
+        Invokes the text_area_append method of the ChatPanel class.
+        It sends a name and a message to be appended on the textarea.
+        
         """
         self.chat.text_area_append(name, message)
 
     def change_chat_name(self, name):
-        """
+        """This method sends a name to the chat panel to be changed.
+        
+        Invokes the change_chat_name method of the ChatPanel class.
+        
         """
         self.chat.change_chat_name(name)
 
-    # Main constructor
-    def __init__(self, *args, **kwargs):
+    def send_message(self, message):
+        """This method receives a message from its chat child and forwards it.
+        
+        This is a callback chain specific method. It will receive a message
+        from the child, then forward that message to the controller which
+        will have a method called "send_message(message)"
+        
+        Args:
+        message: The message that will be sent to the controller.
+        
+        """
+        self.controller.send_message(message)
+
+    def __init__(self, controller, factory, *args, **kwargs):
         """
         """
         tk.Tk.__init__(self, *args, **kwargs)
+        self.factory = factory
+        self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = tk.Menu(self)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.editmenu = tk.Menu(self.menubar, tearoff=0)
         self.viewmenu = tk.Menu(self.menubar, tearoff=0)
         self.helpmenu = tk.Menu(self.menubar, tearoff=0)
-        self.chat = ChatPanel(self)
-        self.friends = FriendsPanel(self)
+        self.chat = ChatPanel(self, factory)
+        self.friends = FriendsPanel(self, factory)
 
         self.title("Cafe")
         self.maxsize(800, 630)
@@ -95,10 +121,6 @@ class MainFrame(tk.Tk):
 
         self.create_panels()
 
-
-
-
-
 if __name__ == "__main__":
-    top = MainFrame()
+    top = MainFrame(None, None)
     top.mainloop()

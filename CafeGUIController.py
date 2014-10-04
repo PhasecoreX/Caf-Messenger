@@ -9,5 +9,3 @@
 
 import MainFrame
 
-top = MainFrame()
-top.mainloop()
