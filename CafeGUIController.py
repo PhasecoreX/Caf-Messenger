@@ -7,5 +7,7 @@
 #	
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import Tkinter as tk
+import MainFrame
 
+top = MainFrame()
+top.mainloop()

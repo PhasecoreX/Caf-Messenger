@@ -32,27 +32,35 @@ class MainFrame(tk.Tk):
 
 class LoginPanel(tk.Frame):
 	def CreateWidgets(self, parent, controller):
+		message = "Please select your username and enter your password.\n"
+		message = message + "If you are a new user, please click 'New User'"
+		self.mainLabel.config(text = message)
+		self.mainLabel.place(x = 15, y = 15, anchor = "nw", width = 350, height = 30)
+		
+		
 		self.nameMenu.config(width = 205, height = 30)
-		self.nameMenu.place(x = 90, y = 5, anchor = "nw", width = 205, height = 30)
+		self.nameMenu.place(x = 120, y = 60, anchor = "nw", width = 205, height = 30)
 		self.PopulateNameMenu()
 		
 		self.passEntry.config(width = 205)
-		self.passEntry.place(x = 90, y = 35, anchor = "nw", width = 205, height = 30)
+		self.passEntry.place(x = 120, y = 105, anchor = "nw", width = 205, height = 30)
 		
 		self.nameLabel.config(width = 80, height = 30, text = "Name:")
-		self.nameLabel.place(x = 5, y = 5, anchor = "nw", width = 80, height = 30)
+		self.nameLabel.place(x = 15, y = 60, anchor = "nw", width = 80, height = 30)
 		
 		self.passLabel.config(width = 80, height = 30, text = "Password:")
-		self.passLabel.place(x = 5, y = 35, anchor = "nw", width = 80, height = 30)
+		self.passLabel.place(x = 15, y = 105, anchor = "nw", width = 80, height = 30)
 		
-		self.errLabel.config(width = 290, height = 60, text = "")
-		self.errLabel.place(x = 5, y = 70, anchor = "nw", width = 290, height = 60)
+		self.errLabel.config(width = 290, height = 30, text = "")
+		self.errLabel.place(x = 15, y = 150, anchor = "nw", width = 290, height = 60)
 		
 		self.loginButton.config(width = 100, height = 30, text = "Login")
-		self.loginButton.place(x = 5, y = 135, anchor = "nw", width = 100, height = 30)
+		self.loginButton.config(command = self.LoginButtonPress)
+		self.loginButton.place(x = 200, y = 195, anchor = "nw", width = 100, height = 30)
 		
 		self.newusrButton.config(width = 100, height = 30, text = "New User")
-		self.newusrButton.place(x = 152, y = 135, anchor = "nw", width = 100, height = 30)
+		self.newusrButton.config(command = self.NewUserButtonPress)
+		self.newusrButton.place(x = 45, y = 195, anchor = "nw", width = 100, height = 30)
 		
 	
 	def LoginError(self):
@@ -76,10 +84,13 @@ class LoginPanel(tk.Frame):
 	
 	def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
+		
 		self.names = self.PopulateNameMenu()
 		self.var = tk.StringVar(self)
 		self.var.set(self.names[0])
 		self.nameMenu = apply(tk.OptionMenu, (self, self.var) + tuple(self.names))
+		
+		self.mainLabel = tk.Label(self)
 		self.passEntry = tk.Entry(self)
 		self.nameLabel = tk.Label(self)
 		self.passLabel = tk.Label(self)

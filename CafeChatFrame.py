@@ -11,6 +11,23 @@
 
 import Tkinter as tk
 
+class MainFrame(tk.Tk):
+	def CreatePanels(self, parent, controller):
+		self.chat = ChatPanel(self, self)
+		self.chat.config(width = 600, height = 600)
+		self.chat.place(x = 5, y = 5, anchor = "nw")
+		
+	
+	def __init__(self, *args, **kwargs):
+		tk.Tk.__init__(self, *args, **kwargs)
+		self.login = ChatPanel(self, self)
+		self.title("Cafe Login")
+		self.maxsize(600, 600)
+		self.minsize(600, 600)
+		self.CreatePanels(self, self)
+		
+	
+
 class ChatPanel(tk.Frame):
 	def createWidgets(self, controller):
 		self.label.config(text = "Chat with _FriendName_:")
@@ -24,7 +41,8 @@ class ChatPanel(tk.Frame):
 		self.sendButton["text"] = "Send"
 		self.sendButton.config(command = self.buttonPress)
 		self.sendButton.config(width = 40, height = 20)
-		self.sendButton.place(x = 525, y = 535, anchor = "nw", width = 45, height = 40)
+		self.sendButton.place(x = 525, y = 535, anchor = "nw")
+		self.sendButton.place(width = 45, height = 40)
 		
 		self.textEntry.config(width = 525)
 		self.textEntry.place(x = 0, y = 525, width = 515, height = 60)
@@ -61,3 +79,8 @@ class ChatPanel(tk.Frame):
 		self.sendButton = tk.Button(self)
 		self.textEntry = tk.Text(self)
 		self.createWidgets(controller)
+		
+
+if __name__ == "__main__":
+	top = MainFrame()
+	top.mainloop()

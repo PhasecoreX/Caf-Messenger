@@ -132,8 +132,6 @@ class FriendsPanel(tk.Frame):
 		self.createWidgets(controller)
 	
 
-
-	
 if __name__ == "__main__":
 	top = MainFrame()
 	top.mainloop()
