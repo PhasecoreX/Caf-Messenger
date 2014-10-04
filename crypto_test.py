@@ -77,7 +77,7 @@ def save_key_sign_test():
     signature = sign(key_a, data)
 
     print "Saving key with password 'hello'..."
-    save_full_key(key_a, "/home/ryan/Desktop/user.pem", "hello")
+    save_key(key_a, "/home/ryan/Desktop/user.pem", "hello")
 
     print "Loading key with password 'hell'..."
     key_b = load_key("/home/ryan/Desktop/user.pem", "hello")
@@ -100,7 +100,7 @@ def save_key_wrong_pass_test():
     signature = sign(key_a, data)
 
     print "Saving key with password 'hello'..."
-    save_full_key(key_a, "/home/ryan/Desktop/user.pem", "hello")
+    save_key(key_a, "/home/ryan/Desktop/user.pem", "hello")
 
     print "Loading key with password 'hell'..."
     try:
@@ -195,4 +195,23 @@ def get_public_key_test():
     print "Public key:"
     print get_public_key_string(key_a)
 
-encrypt_test()
+
+def test_pub_key_save_load():
+    """Test if public (not private) keys can be saved and loaded"""
+    print "Generating key pair..."
+    key_a = generate_key_pair()
+    pub_a = get_public_key(key_a)
+
+    print "Signing text 'lalala'..."
+    test = sign(key_a, "lalala")
+
+    print "Saving public key only..."
+    save_key(pub_a, "test.pem", "hello")
+
+    print "Loading public key..."
+    pub_b = load_key("test.pem", "hello")
+
+    print verify(pub_b, "lalala", test)
+
+
+test_pub_key_save_load()

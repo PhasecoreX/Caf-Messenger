@@ -35,11 +35,12 @@ from Crypto.Signature import PKCS1_PSS
 import logging
 
 
-logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
-logging.basicConfig(filename='/home/ryan/Desktop/example.log',
-                    filemode='w', level=logging.DEBUG)
-# logging.warning('is when this event was logged.')
+logging.basicConfig(format='[%(asctime)s] [%(name)s/%(levelname)s]: ' +
+                    '%(message)s',
+                    datefmt='%H:%M:%S',
+                    filename='example.log',
+                    filemode='w',
+                    level=logging.DEBUG)
 
 
 def generate_key_pair():
@@ -48,7 +49,10 @@ def generate_key_pair():
     Returns:
         RSA key object (_RSAobj) containing the full key pair
     """
-    return RSA.generate(4096)
+    keysize = 4096
+    logger = logging.getLogger('KeygenRSA')
+    logger.info('Now generating a new %sbit RSA key pair...', keysize)
+    return RSA.generate(keysize)
 
 
 def get_public_key(private_key):
@@ -75,12 +79,16 @@ def get_public_key_string(private_key):
     return private_key.publickey().exportKey('PEM')
 
 
-def save_full_key(key, keyfile_path, password):
-    """Saves key to encrypted user.pem file
+def save_key(key, keyfile_path, password=None):
+    """Saves key to file
+
+    Use an extension of .pem for encrypted private keys
+    Use an extension of .asc for non-encrypted public keys
 
     Args:
-        key:      RSA key object (_RSAobj) to write to disk
-        location: Path of folder to save to
+        key:              RSA key object (_RSAobj) to write to disk
+        keyfile_location: Path of folder to save to
+        password:         Password for encrypted key file (for private keys)
 
     Returns:
         True on success, False otherwise
@@ -96,15 +104,18 @@ def save_full_key(key, keyfile_path, password):
         return True
     except IOError:
         return False
+    except Exception:  # Should never happen
+        return False
 
 
-def load_key(keyfile_path, password):
-    """Loads key from .pem file
+def load_key(keyfile_path, password=None):
+    """Loads key from file
 
-    Will work with both public and private key files
+    Will work with both public and private key files (.pem and .asc)
 
     Args:
-        file: Full path and file name of .pem key
+        keyfile_path: Full path and file name of .pem key
+        password:     Password to encrypt key file (for private keys)
 
     Returns:
         RSA key object (_RSAobj) containing public and/or private key
@@ -126,8 +137,13 @@ def encrypt_auth(pub_key, plaintext):
     Returns:
         Encrypted result asymmetric key (tuple list(?)
     """
+    logger = logging.getLogger('EncryptRSA')
+    logger.debug('Plaintext to be encrypted (using key %s): %s',
+                 pub_key, plaintext)
     rng = Random.new()
-    return pub_key.encrypt(plaintext, rng.read(8192))
+    result = pub_key.encrypt(plaintext, rng.read(8192))
+    logger.debug('Resulting encrypted text: %s', result)
+    return result
 
 
 def decrypt_auth(private_key, ciphertext):
@@ -141,11 +157,16 @@ def decrypt_auth(private_key, ciphertext):
     Returns:
         Decrypted message (string)
     """
-    return private_key.decrypt(ciphertext)
+    logger = logging.getLogger('DecryptRSA')
+    logger.debug('Plaintext to be decrypted (using key %s): %s',
+                 private_key, ciphertext)
+    result = private_key.decrypt(ciphertext)
+    logger.debug('Resulting decrypted text: %s', result)
+    return result
 
 
 def sign(private_key, data):
-    """Signs data
+    """Hashes data and signs it
 
     Args:
         private_key: RSA key object (_RSAobj) containing users private key,
@@ -155,14 +176,17 @@ def sign(private_key, data):
     Returns:
         Signature for given data
     """
+    logger = logging.getLogger('HashSign')
     hash_obj = SHA.new()
     hash_obj.update(data)
     signer = PKCS1_PSS.new(private_key)
-    return signer.sign(hash_obj)
+    result = signer.sign(hash_obj)
+    logger.debug('Hash generated: %s', result)
+    return result
 
 
 def verify(public_key, data, signature):
-    """Checks signature on data
+    """Hashes data and checks signature on it
 
     Args:
         public_key: RSA key object (_RSAobj) containing signers public key
@@ -172,10 +196,13 @@ def verify(public_key, data, signature):
     Returns:
         True if authentic, False otherwise
     """
+    logger = logging.getLogger('HashVerify')
     hash_obj = SHA.new()
     hash_obj.update(data)
     signer = PKCS1_PSS.new(public_key)
-    return signer.verify(hash_obj, signature)
+    result = signer.verify(hash_obj, signature)
+    logger.info('Hash verified: %s', result)
+    return result
 
 
 def encrypt_message(key, message):
@@ -189,13 +216,15 @@ def encrypt_message(key, message):
     Returns:
         Encrypted Text (string)
     """
-    logging.debug('Plaintext to be encrypted:/n%s', message)
+    logger = logging.getLogger('EncryptAES')
+    logger.debug('Plaintext to be encrypted (using key %s): %s',
+                 key, message)
     iv_random = Random.new().read(AES.block_size)
     cipher = AES.new(key, AES.MODE_CFB, iv_random)
     pad_len = AES.block_size - (len(message) % AES.block_size)
     padding = ''.join([chr(pad_len)] * pad_len)
     encrypted_text = iv_random + cipher.encrypt(message + padding)
-    logging.debug('Encrypted text:/n%s', encrypted_text)
+    logger.debug('Resulting encrypted text: %s', encrypted_text)
     return encrypted_text
 
 
@@ -210,11 +239,13 @@ def decrypt_message(key, ciphertext):
     Returns:
         Decrypted Text (string)
     """
-    logging.debug('Ciphertext to be decrypted:/n%s', ciphertext)
+    logger = logging.getLogger('DecryptAES')
+    logger.debug('Ciphertext to be decrypted (using key %s): %s',
+                 key, ciphertext)
     iv_random = ciphertext[:AES.block_size]
     cipher = AES.new(key, AES.MODE_CFB, iv_random)
     padded_msg = cipher.decrypt(ciphertext[AES.block_size:])
     pad_len = ord(padded_msg[-1])
     decrypted_text = padded_msg[:len(padded_msg) - pad_len]
-    logging.debug('Decrypted text:/n%s', decrypted_text)
+    logger.debug('Resulting decrypted text: %s', decrypted_text)
     return decrypted_text
