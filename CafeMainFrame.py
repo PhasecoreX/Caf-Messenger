@@ -24,6 +24,7 @@ import crypto
 
 from sys import stdout
 
+HOST = ''
 PORT = 1025
 
 class MainFrame(tk.Tk):
@@ -74,63 +75,64 @@ class MainFrame(tk.Tk):
 
     def get_entry_text(self):
         """This method gets the text out of the entrytext widget of chat.
-        
-        Invokes the get_entry_text method of the ChatPanel 
-        
+
+        Invokes the get_entry_text method of the ChatPanel
+
         """
         return self.chat.get_entry_text()
-    
+
     def quit(self):
         reactor.stop()
 
     def append_message(self, name, message):
         """This method sends a message and name to the chat panel.
-        
+
         Invokes the text_area_append method of the ChatPanel class.
         It sends a name and a message to be appended on the textarea.
-        
+
         """
         self.chat.text_area_append(name, message)
 
     def change_chat_name(self, name):
         """This method sends a name to the chat panel to be changed.
-        
+
         Invokes the change_chat_name method of the ChatPanel class.
-        
+
         """
         self.chat.change_chat_name(name)
 
     def send(self, message):
         """This method receives a message from its chat child and forwards it.
-        
+
         This is a callback chain specific method. It will receive a message
         from the child, then forward that message to the controller which
         will have a method called "send_message(message)"
-        
+
         Args:
         message: The message that will be sent to the controller.
-        
+
         """
-        print "Sending Message: " + message
-        #self.d = connectProtocol(self.point, Greeter())
-        print self.d
-        #self.d.callback(message)
+        self.conn.transport.write(message.encode('utf8')[:-1] + '\r\n')
+        print "Sending Message: " + repr(message.encode('utf8')[:-1] + '\r\n')
+        # self.d = connectProtocol(self.point, Greeter())
+
 
     def connected(self, connectedProtocol):
         self.connectedProtocol = connectedProtocol
 
-
     def __init__(self, controller, factory, *args, **kwargs):
         """
         """
-        tk.Tk.__init__(self, *args, **kwargs)
 
+        # self.point = TCP4ClientEndpoint(reactor, "", PORT)
+        # self.d = connectProtocol(self.point, Greeter())
+        # self.connectedProtocol = None
+        # self.d.addCallback(lambda p: p.sendMessage())
+        # self.d.addErrback(lambda err: err.printTraceback())
+        self.conn = reactor.connectTCP(HOST, PORT, GreeterFactory())
+        print self.conn.transport
+        tk.Tk.__init__(self, *args, **kwargs)
         self.factory = factory
-        self.point = TCP4ClientEndpoint(reactor, "", PORT)
-        self.d = connectProtocol(self.point, Greeter())
-        self.connectedProtocol = None
-        self.d.addCallback(lambda p: self.connected(p))
-        self.d.addErrback(lambda err: err.printTraceback())
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = tk.Menu(self)
@@ -148,6 +150,7 @@ class MainFrame(tk.Tk):
         self.protocol('WM_DELETE_WINDOW', self.quit)
         self.create_panels()
 
+
 class Greeter(basic.LineReceiver):
     def lineReceived(self, line):
         print "Line Received:"
@@ -159,14 +162,15 @@ class Greeter(basic.LineReceiver):
         key = b'01234567890123450123456789012345'
         emsg = crypto.encrypt_message(key, msg[:-1])
         self.transport.write(emsg + '\r\n')
-        
+
     def connectionLost(self, reason):
         print reason
+
 
 class GreeterFactory(ClientFactory):
     def buildProtocol(self, addr):
         return Greeter()
-    
+
 
 if __name__ == "__main__":
     factory = GreeterFactory()
