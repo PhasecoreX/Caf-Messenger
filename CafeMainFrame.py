@@ -15,9 +15,12 @@ from CafeFriendFrameS1 import FriendsPanel
 from CafeChatFrameS1 import ChatPanel
 import Tkinter as tk
 
-from twisted.internet.protocol import Protocol, Factory 
+from twisted.internet.protocol import Protocol, ClientFactory
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 from twisted.internet import tksupport, reactor, protocol
+from twisted.protocols import basic
+
+import crypto
 
 from sys import stdout
 
@@ -108,8 +111,14 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
         
         """
-        
-        self.d.addCallback(lambda p: p.sendMessage(message))
+        print "Sending Message: " + message
+        #self.d = connectProtocol(self.point, Greeter())
+        print self.d
+        #self.d.callback(message)
+
+    def connected(self, connectedProtocol):
+        self.connectedProtocol = connectedProtocol
+
 
     def __init__(self, controller, factory, *args, **kwargs):
         """
@@ -119,6 +128,9 @@ class MainFrame(tk.Tk):
         self.factory = factory
         self.point = TCP4ClientEndpoint(reactor, "", PORT)
         self.d = connectProtocol(self.point, Greeter())
+        self.connectedProtocol = None
+        self.d.addCallback(lambda p: self.connected(p))
+        self.d.addErrback(lambda err: err.printTraceback())
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = tk.Menu(self)
@@ -136,18 +148,22 @@ class MainFrame(tk.Tk):
         self.protocol('WM_DELETE_WINDOW', self.quit)
         self.create_panels()
 
-class Greeter(Protocol):
-    def dataRecieved(self, data):
-        print "Data Received:"
-        print str(data)
-        stdout.write(data)
+class Greeter(basic.LineReceiver):
+    def lineReceived(self, line):
+        print "Line Received:"
+        print repr(line)
 
     def sendMessage(self, msg):
-        print "Data Sent:"
-        print str(msg)
-        self.transport.write(msg.encode("utf-8"))
+        # print "Data Sent:"
+        # print str(msg)
+        key = b'01234567890123450123456789012345'
+        emsg = crypto.encrypt_message(key, msg[:-1])
+        self.transport.write(emsg + '\r\n')
+        
+    def connectionLost(self, reason):
+        print reason
 
-class GreeterFactory(Factory):
+class GreeterFactory(ClientFactory):
     def buildProtocol(self, addr):
         return Greeter()
     
