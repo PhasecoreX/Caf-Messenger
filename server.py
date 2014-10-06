@@ -8,17 +8,19 @@ class PubProtocol(basic.LineReceiver):
  
     def connectionMade(self):
         self.factory.clients.add(self)
-        self.transport.write("Welcome!\r\n")
-        print 'Connection'
+        #self.transport.write("Welcome!\r\n")
+        print 'New Connection Established\n'
  
     def connectionLost(self, reason):
         self.factory.clients.remove(self)
+        print 'Connection Lost\n'
  
     def lineReceived(self, line):
         line = line + "\r\n"
-        print repr(line)
+        print "New Message:\n" + line + "\nSending Echo...\n"
         for c in self.factory.clients:
-            c.transport.write("<{}> {}".format(self.transport.getHost(), line))
+            #c.transport.write("<{}> {}".format(self.transport.getHost(), line))
+            c.transport.write(line)
 
 
     #def dataReceived(self, data):

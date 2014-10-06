@@ -112,8 +112,10 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
 
         """
-        self.conn.transport.write(message.encode('utf8')[:-1] + '\r\n')
-        print "Sending Message: " + repr(message.encode('utf8')[:-1] + '\r\n')
+        print "Encrypting:\n" + message[:-1]
+        emsg = crypto.encrypt_message(self.key, message[:-1])
+        self.conn.transport.write(emsg + "\r\n")
+        print "Sending:\n" + emsg + "\n"
         # self.d = connectProtocol(self.point, Greeter())
 
 
@@ -130,8 +132,10 @@ class MainFrame(tk.Tk):
         # self.d.addCallback(lambda p: p.sendMessage())
         # self.d.addErrback(lambda err: err.printTraceback())
         self.conn = reactor.connectTCP(HOST, PORT, GreeterFactory())
-        print self.conn.transport
+        #print self.conn.transport
+        print "\nWelcome to CAFE Messenger! (debug mode)\n"
         tk.Tk.__init__(self, *args, **kwargs)
+        self.key = b'01234567890123450123456789012345'
         self.factory = factory
         self.controller = controller
         self.container_frame = tk.Frame(self)
@@ -153,18 +157,19 @@ class MainFrame(tk.Tk):
 
 class Greeter(basic.LineReceiver):
     def lineReceived(self, line):
-        print "Line Received:"
-        print repr(line)
+        print "Incoming:\n" + line
+        key = b'01234567890123450123456789012345'
+        pmsg = crypto.decrypt_message(key, line)
+        print "Decrypted:\n" + pmsg + "\n"
+        top.append_message("Server_Echo", pmsg)
 
     def sendMessage(self, msg):
-        # print "Data Sent:"
-        # print str(msg)
         key = b'01234567890123450123456789012345'
-        emsg = crypto.encrypt_message(key, msg[:-1])
-        self.transport.write(emsg + '\r\n')
+        emsg = crypto.encrypt_message(key, msg)
+        self.transport.write(emsg)
 
     def connectionLost(self, reason):
-        print reason
+        print "Connection Lost!"
 
 
 class GreeterFactory(ClientFactory):
@@ -173,6 +178,7 @@ class GreeterFactory(ClientFactory):
 
 
 if __name__ == "__main__":
+    
     factory = GreeterFactory()
     top = MainFrame(None, factory)
     # top.mainloop()

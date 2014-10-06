@@ -37,7 +37,7 @@ class ChatPanel(tk.Frame):
         """
         """
         self.textarea.config(state="normal")
-        self.textarea.insert("end", name + ": " + message)
+        self.textarea.insert("end", name + ": " + message + "\n")
         self.textarea.config(state="disabled")
 
     def enter_key_released(self, event):
