@@ -211,6 +211,7 @@ def encrypt_message(key, message):
     Args:
         key:     Key used for encrypting.
                  Keys can be 128, 192, or 256 bits long (we will use 256)
+                 (That's 16, 24, and 32 characters)
         message: Message to encrypt
 
     Returns:

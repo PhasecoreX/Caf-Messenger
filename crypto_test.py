@@ -181,8 +181,8 @@ def encrypt_test():
 
 def sym_cipher_test():
     """Encrypt and decrypt AES"""
-    key = b'0123456789012345'
-    encrypted = encrypt_message(key, "Test")
+    key = b'01234567890123450123456789012345'
+    encrypted = encrypt_message(key, "poop")
     print encrypted
     print decrypt_message(key, encrypted)
 
@@ -214,4 +214,4 @@ def test_pub_key_save_load():
     print verify(pub_b, "lalala", test)
 
 
-test_pub_key_save_load()
+sym_cipher_test()
