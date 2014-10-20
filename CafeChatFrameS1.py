@@ -69,10 +69,6 @@ class ChatPanel(tk.Frame):
         self.textarea.delete(1.0, "end")
         self.textarea.config(state="disabled")
 
-    def send(self, message):
-        self.parent.send(message)
-        
-
     def send_button_pressed(self):
         """This method is called when the send button is pressed.
         
@@ -81,7 +77,7 @@ class ChatPanel(tk.Frame):
         
         """
         message = self.textentry.get(1.0, "end")
-        self.send(message)
+        self.parent.send(message)
         self.textarea.config(state="normal")
         self.textarea.insert("end", "Client: ")
         self.textarea.insert("end", self.textentry.get(1.0, "end"))
@@ -89,17 +85,11 @@ class ChatPanel(tk.Frame):
         self.textarea.config(state="disabled")
         self.textentry.delete(1.0, "end")
 
-    def get_entry_text(self):
-        """
-        """
-        return self.textentry.get(1.0, "end")
-
-    def __init__(self, parent, factory):
+    def __init__(self, parent):
         """
         """
         tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.factory = factory
         self.namelabel = tk.Label(self)
         self.textarea = tk.Text(self)
         self.sendbutton = tk.Button(self)

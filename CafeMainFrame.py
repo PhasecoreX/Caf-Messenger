@@ -13,16 +13,12 @@
 
 from CafeFriendFrameS1 import FriendsPanel
 from CafeChatFrameS1 import ChatPanel
+from CafeMainMenuBar import MainMenu
 import Tkinter as tk
 
-from twisted.internet.protocol import Protocol, ClientFactory
-from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
-from twisted.internet import tksupport, reactor, protocol
-from twisted.protocols import basic
+from twisted.internet import reactor
 
 import crypto
-
-from sys import stdout
 
 HOST = ''
 PORT = 1025
@@ -37,31 +33,7 @@ class MainFrame(tk.Tk):
 
         self.container_frame.config(width=800, height=630)
         self.container_frame.place(x=0, y=0, anchor="nw")
-
-        # Add a cascade list called filemenu
-        self.filemenu.add_command(label="Print")
-        self.filemenu.add_command(label="Quit", command=self.quit)
-
-        # Add a cascade list called editmenu
-        self.editmenu.add_command(label="Copy")
-        self.editmenu.add_command(label="Paste")
-        self.editmenu.add_command(label="Select All")
-
-        # Add a cascade list called viewmenu
-        self.viewmenu.add_command(label="View RSA Key Chain")
-        self.viewmenu.add_command(label="View Current Chat's Public Key")
-
-        # Add a cascade list called helpmenu
-        self.helpmenu.add_command(label="About Cafe")
-        self.helpmenu.add_command(label="About Encryption")
-        self.helpmenu.add_command(label="About Distributed Systems")
-
-        # Add all the cascade menus to the main menubar
-        self.menubar.add_cascade(label="File", menu=self.filemenu)
-        self.menubar.add_cascade(label="Edit", menu=self.editmenu)
-        self.menubar.add_cascade(label="View", menu=self.viewmenu)
-        self.menubar.add_cascade(label="Help", menu=self.helpmenu)
-
+        
         # Display the menu
         self.config(menu=self.menubar)
 
@@ -72,14 +44,6 @@ class MainFrame(tk.Tk):
         # Create and place the Friends List
         self.friends.config(width=190, height=590)
         self.friends.place(x=605, y=5, anchor="nw")
-
-    def get_entry_text(self):
-        """This method gets the text out of the entrytext widget of chat.
-
-        Invokes the get_entry_text method of the ChatPanel
-
-        """
-        return self.chat.get_entry_text()
 
     def quit(self):
         reactor.stop()
@@ -112,40 +76,26 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
 
         """
+        
+        #Chop off the \n
         print "Encrypting:\n" + message[:-1]
         emsg = crypto.encrypt_message(self.key, message[:-1])
         self.conn.transport.write(emsg + "\r\n")
         print "Sending:\n" + emsg + "\n"
-        # self.d = connectProtocol(self.point, Greeter())
 
-
-    def connected(self, connectedProtocol):
-        self.connectedProtocol = connectedProtocol
-
-    def __init__(self, controller, factory, *args, **kwargs):
+    def __init__(self, controller, conn, *args, **kwargs):
         """
         """
-
-        # self.point = TCP4ClientEndpoint(reactor, "", PORT)
-        # self.d = connectProtocol(self.point, Greeter())
-        # self.connectedProtocol = None
-        # self.d.addCallback(lambda p: p.sendMessage())
-        # self.d.addErrback(lambda err: err.printTraceback())
-        self.conn = reactor.connectTCP(HOST, PORT, GreeterFactory())
-        #print self.conn.transport
+        self.conn = conn
         print "\nWelcome to CAFE Messenger! (debug mode)\n"
         tk.Tk.__init__(self, *args, **kwargs)
         self.key = b'01234567890123450123456789012345'
-        self.factory = factory
+        self.conn = conn
         self.controller = controller
         self.container_frame = tk.Frame(self)
-        self.menubar = tk.Menu(self)
-        self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.editmenu = tk.Menu(self.menubar, tearoff=0)
-        self.viewmenu = tk.Menu(self.menubar, tearoff=0)
-        self.helpmenu = tk.Menu(self.menubar, tearoff=0)
-        self.chat = ChatPanel(self, factory)
-        self.friends = FriendsPanel(self, factory)
+        self.menubar = MainMenu(self)
+        self.chat = ChatPanel(self)
+        self.friends = FriendsPanel(self)
 
         self.title("Cafe")
         self.maxsize(800, 630)
@@ -153,34 +103,3 @@ class MainFrame(tk.Tk):
 
         self.protocol('WM_DELETE_WINDOW', self.quit)
         self.create_panels()
-
-
-class Greeter(basic.LineReceiver):
-    def lineReceived(self, line):
-        print "Incoming:\n" + line
-        key = b'01234567890123450123456789012345'
-        pmsg = crypto.decrypt_message(key, line)
-        print "Decrypted:\n" + pmsg + "\n"
-        top.append_message("Server_Echo", pmsg)
-
-    def sendMessage(self, msg):
-        key = b'01234567890123450123456789012345'
-        emsg = crypto.encrypt_message(key, msg)
-        self.transport.write(emsg)
-
-    def connectionLost(self, reason):
-        print "Connection Lost!"
-
-
-class GreeterFactory(ClientFactory):
-    def buildProtocol(self, addr):
-        return Greeter()
-
-
-if __name__ == "__main__":
-    
-    factory = GreeterFactory()
-    top = MainFrame(None, factory)
-    # top.mainloop()
-    tksupport.install(top)
-    reactor.run()

@@ -55,12 +55,11 @@ class FriendsPanel(tk.Frame):
         self.flist.delete("anchor")
         print "How mean, such enemy."
 
-    def __init__(self, parent, factory):
+    def __init__(self, parent):
         """
         """
         tk.Frame.__init__(self, parent)
         self.parent = parent
-        self.factory = factory
         self.fheader = tk.Label(self)
         self.flist = tk.Listbox(self)
         self.addbutton = tk.Button(self)

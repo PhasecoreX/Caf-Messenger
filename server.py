@@ -8,7 +8,6 @@ class PubProtocol(basic.LineReceiver):
 
     def connectionMade(self):
         self.factory.clients.add(self)
-        #self.transport.write("Welcome!\r\n")
         print 'New Connection Established\n'
 
     def connectionLost(self, reason):
