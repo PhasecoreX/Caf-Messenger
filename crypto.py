@@ -55,6 +55,16 @@ def generate_key_pair():
     return RSA.generate(keysize)
 
 
+def generate_symmetric_key():
+    """Generates a symmetric 256 bit AES key
+
+    Returns:
+        String (I think?)
+    """
+    keysize = 32
+    return Random.new().read(keysize)
+
+
 def get_public_key(private_key):
     """Extracts the public key from a full key pair
 

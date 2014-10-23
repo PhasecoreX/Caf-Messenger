@@ -36,89 +36,51 @@ class Packet:
 
     Args:
         destination:       8 Hex character destination
-        encrypted_payload: Encrypted packet (see packets below)
+        encrypted_payload: Encrypted packet (see Packet_Data below)
         signature:         Signature over destination and encrypted payload
     """
 
-    def __init__(self, destination, encrypted_payload, signature):
+    def __init__(self, packet_type, destination, payload, signature):
+        self.packet_type = packet_type
         self.destination = destination
-        self.encrypted_payload = encrypted_payload
+        self.payload = payload
         self.signature = signature
+
+    def get_packet_type(self):
+        return self.packet_type
 
     def get_destination(self):
         return self.destination
 
     def get_payload(self):
-        return self.encrypted_payload
+        return self.payload
 
     def get_signature(self):
         return self.signature
 
 
-class APacket:
+class Packet_Data:
 
-    """Defines A-Packet format
+    """Defines the data format (payload) in the packet
 
-    Used for initiating communication.
-    One option for the encrypted_payload filed in Packet
+    This will be encrypted for sending, or decrypted when received.
 
     Args:
-        source:       8 Hex character source
-        proposed_key: Symmetric key to use for future communications
+        packet_type: Type of packet (A, C, or M thus far)
+        source:      8 Hex character source
+        data:        Symmetric key to use for future communications
     """
 
-    def __init__(self, source, proposed_key):
+    def __init__(self, packet_type, source, data):
+        self.packet_type = packet_type
         self.source = source
-        self.proposed_key = proposed_key
+        self.data = data
+
+    def get_packet_type(self):
+        return self.packet_type
 
     def get_source(self):
         return self.source
 
-    def get_key(self):
-        return self.proposed_key
-
-
-class MPacket:
-
-    """Defines M-Packet format
-
-    Used for sending messages.
-    One option for the encrypted_payload filed in Packet
-
-    Args:
-        source:  8 Hex character source
-        message: Message to send
-    """
-
-    def __init__(self, source, message):
-        self.source = source
-        self.message = message
-
-    def get_source(self):
-        return self.source
-
-    def get_message(self):
-        return self.message
-
-
-class CPacket:
-
-    """Defines C-Packet format
-
-    Used for sending commands.
-    One option for the encrypted_payload filed in Packet
-
-    Args:
-        source:  8 Hex character source
-        command: Command to send
-    """
-
-    def __init__(self, source, command):
-        self.source = source
-        self.command = command
-
-    def get_source(self):
-        return self.source
-
-    def get_command(self):
-        return self.command
+    def get_data(self):
+        return self.data
