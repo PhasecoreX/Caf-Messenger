@@ -45,6 +45,15 @@ class Packet:
         self.encrypted_payload = encrypted_payload
         self.signature = signature
 
+    def get_destination(self):
+        return self.destination
+
+    def get_payload(self):
+        return self.encrypted_payload
+
+    def get_signature(self):
+        return self.signature
+
 
 class APacket:
 
