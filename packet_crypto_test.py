@@ -21,13 +21,14 @@
 #  MA 02110-1301, USA.
 #
 #
-
 """packet_crypto_test.py
 
 Tests packet_crypto
 """
 
-from packet_crypto import *
+from crypto import generate_key_pair, generate_symmetric_key
+from packet_crypto import gen_auth, decrypt_packet_A, gen_command,\
+    decrypt_packet_S, gen_message
 
 
 def test_everything():

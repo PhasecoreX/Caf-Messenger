@@ -21,12 +21,14 @@
 #  MA 02110-1301, USA.
 #
 #
-
 """crypto_test.py
 
 For testing crypto.py
 """
-from crypto import *
+
+from crypto import generate_key_pair, get_public_key, sign, verify, save_key,\
+    load_key, encrypt_auth, decrypt_auth, encrypt_message, decrypt_message,\
+    get_public_key_string
 
 
 def bad_sign_test():

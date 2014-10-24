@@ -21,12 +21,13 @@
 #  MA 02110-1301, USA.
 #
 #
-
 """packet_crypto.py
 
 Makes encryption and packet generation even easier!
 """
-from crypto import *
+
+from crypto import encrypt_message, sign, encrypt_auth, verify, decrypt_message,\
+    decrypt_auth
 from packet import *
 import cPickle as pickle
 
