@@ -13,73 +13,85 @@ import Tkinter as tk
 
 
 class MainFrame(tk.Tk):
+    """
+    """
 
-    def CreatePanels(self, parent, controller):
-        self.chat = ChatPanel(self, self)
-        self.chat.config(width=600, height=600)
+    def create_panels(self):
+        """
+        """
+
+        self.container_frame.config(width=800, height=630)
+        self.container_frame.place(x=0, y=0, anchor="nw")
+        
+        # Display the menu
+        self.config(menu=self.menubar)
+
+        # Create and place the Chat Panel
+        self.chat.config(width=590, height=590)
         self.chat.place(x=5, y=5, anchor="nw")
 
-    def __init__(self, *args, **kwargs):
+        # Create and place the Friends List
+        self.friends.config(width=190, height=590)
+        self.friends.place(x=605, y=5, anchor="nw")
+
+    def quit(self):
+        reactor.stop()
+
+    def append_message(self, name, message):
+        """This method sends a message and name to the chat panel.
+
+        Invokes the text_area_append method of the ChatPanel class.
+        It sends a name and a message to be appended on the textarea.
+
+        """
+        self.chat.text_area_append(name, message)
+
+    def change_chat_name(self, name):
+        """This method sends a name to the chat panel to be changed.
+
+        Invokes the change_chat_name method of the ChatPanel class.
+
+        """
+        self.chat.change_chat_name(name)
+
+    def send(self, message):
+        """This method receives a message from its chat child and forwards it.
+
+        This is a callback chain specific method. It will receive a message
+        from the child, then forward that message to the controller which
+        will have a method called "send_message(message)"
+
+        Args:
+        message: The message that will be sent to the controller.
+
+        """
+        
+        #Chop off the \n
+        print "Encrypting:\n" + message[:-1]
+        emsg = crypto.encrypt_message(self.key, message[:-1])
+        self.conn.transport.write(emsg + "\r\n")
+        print "Sending:\n" + emsg + "\n"
+
+    def __init__(self, controller, conn, *args, **kwargs):
+        """
+        """
+        self.conn = conn
+        print "\nWelcome to CAFE Messenger! (debug mode)\n"
         tk.Tk.__init__(self, *args, **kwargs)
-        self.login = ChatPanel(self, self)
-        self.title("Cafe Login")
-        self.maxsize(600, 600)
-        self.minsize(600, 600)
-        self.CreatePanels(self, self)
+        self.key = b'01234567890123450123456789012345'
+        self.conn = conn
+        self.controller = controller
+        self.container_frame = tk.Frame(self)
+        self.menubar = MainMenu(self)
+        self.chat = ChatPanel(self)
+        self.friends = FriendsPanel(self)
 
+        self.title("Cafe")
+        self.maxsize(800, 630)
+        self.minsize(800, 630)
 
-class ChatPanel(tk.Frame):
-
-    def createWidgets(self, controller):
-        self.label.config(text="Chat with _FriendName_:")
-        self.label.config(width=570, height=20)
-        self.label.place(x=0, y=0, anchor="nw", width=570, height=20)
-
-        self.textArea.config(width=570, height=495, state="disabled")
-        self.textArea.place(x=0, y=25, anchor="nw", width=570, height=495)
-        self.textArea.config(background="lightgray", borderwidth=2)
-
-        self.sendButton["text"] = "Send"
-        self.sendButton.config(command=self.buttonPress)
-        self.sendButton.config(width=40, height=20)
-        self.sendButton.place(x=525, y=535, anchor="nw")
-        self.sendButton.place(width=45, height=40)
-
-        self.textEntry.config(width=525)
-        self.textEntry.place(x=0, y=525, width=515, height=60)
-        self.textEntry.bind("<KeyPress-Return>", self.enterKeyPress)
-        self.textEntry.bind("<Shift-Return>", self.shiftEnterPress)
-
-    def shiftEnterPress(self, event):
-        self.textEntry.insert("end", "\n")
-        return 'break'
-
-    def enterKeyRelease(self, event):
-        self.textEntry.delete(1.0, "end")
-
-    def enterKeyPress(self, event):
-        t = self.textEntry.get(1.0, "end")
-        if(t == "\n"):
-            return 'break'
-        self.buttonPress()
-        return 'break'
-
-    def buttonPress(self):
-        self.textArea.config(state="normal")
-        self.textArea.insert("end", "Client: ")
-        self.textArea.insert("end", self.textEntry.get(1.0, "end"))
-        self.textArea.see("end")
-        self.textArea.config(state="disabled")
-        self.textEntry.delete(1.0, "end")
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.label = tk.Label(self)
-        self.textArea = tk.Text(self)
-        self.sendButton = tk.Button(self)
-        self.textEntry = tk.Text(self)
-        self.createWidgets(controller)
-
+        self.protocol('WM_DELETE_WINDOW', self.quit)
+        self.create_panels()
 
 if __name__ == "__main__":
     top = MainFrame()

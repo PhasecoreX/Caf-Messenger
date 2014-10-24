@@ -14,7 +14,7 @@
 import Tkinter as tk
 
 
-class MainFrame(tk.Tk):
+class LoginFrame(tk.Tk):
 
     def CreatePanels(self, parent, controller):
         self.login = LoginPanel(self, self)
@@ -96,5 +96,5 @@ class LoginPanel(tk.Frame):
 
 
 if __name__ == "__main__":
-    top = MainFrame()
+    top = LoginFrame()
     top.mainloop()

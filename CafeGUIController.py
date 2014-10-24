@@ -8,10 +8,13 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 from CafeMainFrame import MainFrame
+from CafeLoginFrame import LoginFrame
 
 from twisted.internet.protocol import ClientFactory
 from twisted.internet import tksupport, reactor
 from twisted.protocols import basic
+
+import threading
 
 import crypto
 
@@ -44,7 +47,6 @@ class GreeterFactory(ClientFactory):
 
 
 if __name__ == "__main__":
-    
     factory = GreeterFactory()
     conn = reactor.connectTCP(HOST, PORT, GreeterFactory())
     top = MainFrame(None, conn)

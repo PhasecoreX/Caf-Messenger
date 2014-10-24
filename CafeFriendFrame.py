@@ -63,59 +63,6 @@ class MainFrame(tk.Tk):
 
         self.createPanels()
 
-
-class FriendsPanel(tk.Frame):
-
-    def createWidgets(self, controller):
-        self.fheader.config(text="_ClientName_'s Friendlist")
-        self.fheader.config(width=185, height=20)
-        self.fheader.place(x=0, y=0, anchor="nw", width=185, height=20)
-
-        self.flist.config(width=185, height=505)
-        self.flist.place(x=0, y=25, anchor="nw", width=185, height=505)
-
-        self.friendEntry.config(width=90, height=20)
-        self.friendEntry.place(x=0, y=535, anchor="nw", width=90, height=20)
-        self.friendEntry.bind("<Return>", self.enterKeyPress)
-
-        self.addButton.config(text="Add Friend", width=90, height=20)
-        self.addButton.config(command=self.addButtonPress)
-        self.addButton.place(x=95, y=535, anchor="nw", width=90, height=20)
-
-        self.chatButton.config(text="Chat", width=90, height=20)
-        self.chatButton.config(command=self.chatButtonPress)
-        self.chatButton.place(x=0, y=560, anchor="nw", width=90, height=20)
-
-        self.removeButton.config(text="Remove", width=90, height=20)
-        self.removeButton.config(command=self.removeButtonPress)
-        self.removeButton.place(x=95, y=560, anchor="nw", width=90, height=20)
-
-    def addButtonPress(self):
-        print "Such Friend! Wow."
-        self.flist.insert("end", self.friendEntry.get(1.0, "end"))
-        self.friendEntry.delete(1.0, "end")
-
-    def enterKeyPress(self, event):
-        return 'break'
-
-    def chatButtonPress(self):
-        print "So chatty, much talk."
-
-    def removeButtonPress(self):
-        self.flist.delete("anchor")
-        print "How mean, such enemy."
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.fheader = tk.Label(self)
-        self.flist = tk.Listbox(self)
-        self.addButton = tk.Button(self)
-        self.removeButton = tk.Button(self)
-        self.friendEntry = tk.Text(self)
-        self.chatButton = tk.Button(self)
-        self.createWidgets(controller)
-
-
 if __name__ == "__main__":
     top = MainFrame()
     top.mainloop()
