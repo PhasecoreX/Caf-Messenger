@@ -44,7 +44,8 @@ def test_everything():
 
     print "Creating auth packet A->B..."
     # This will be the packet sent to initiate a connection
-    packet = gen_auth("A", "B", symm, key_b, key_a)
+    packet = gen_auth("A", "B", "ConvoID_1", symm,
+                      key_b, key_a)
 
     print "Decrypting packet..."
     decrypted_packet = decrypt_packet_A(packet, key_b, key_a)
@@ -55,7 +56,8 @@ def test_everything():
     print ""
 
     print "Creating command packet B->A..."
-    packet = gen_command("B", "A", "accept", proposed_symm, key_b)
+    packet = gen_command("B", "A", "ConvoID_2", "accept",
+                         proposed_symm, key_b)
 
     print "Decrypting packet..."
     decrypted_packet = decrypt_packet_S(packet, proposed_symm, key_b)
@@ -66,7 +68,8 @@ def test_everything():
     print ""
 
     print "Creating message packet A->B..."
-    packet = gen_message("A", "B", "Hello World!", proposed_symm, key_a)
+    packet = gen_message("A", "B", "ConvoID_1", "Hello World!",
+                         proposed_symm, key_a)
 
     print "Decrypting packet..."
     decrypted_packet = decrypt_packet_S(packet, proposed_symm, key_a)
@@ -77,7 +80,8 @@ def test_everything():
     print ""
 
     print "Creating message packet B->A..."
-    packet = gen_message("B", "A", "Hello World!", proposed_symm, key_a)
+    packet = gen_message("B", "A", "ConvoID_2", "Hello World!",
+                         proposed_symm, key_a)
 
     print "Decrypting packet with incorrect signature..."
     decrypted_packet = decrypt_packet_S(packet, proposed_symm, key_b)

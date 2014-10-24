@@ -32,48 +32,71 @@ class Packet:
 
     """Defines master packet format
 
-    This will be the packet/class/object that will be sent over the network
+    This will be the object that will be sent over the network
 
     Args:
-        destination:       8 Hex character destination
-        encrypted_payload: Encrypted packet (see Packet_Data below)
-        signature:         Signature over destination and encrypted payload
+        packet_type: Type of packet (A, S, or M currently)
+        source:      (Encrypted) Where the packet came from
+        destination: 8 Hex character destination
+        convo_id:    Conversation ID (to know what convo this packet goes to)
+        data:        (Encrypted) Data
+        signature:   Signature over all above fields
     """
 
-    def __init__(self, packet_type, destination, payload, signature):
+    def __init__(self,
+                 packet_type,
+                 source,
+                 destination,
+                 convo_id,
+                 data,
+                 signature):
         self.packet_type = packet_type
+        self.source = source
         self.destination = destination
-        self.payload = payload
+        self.convo_id = convo_id
+        self.data = data
         self.signature = signature
 
     def get_packet_type(self):
         return self.packet_type
 
+    def get_source(self):
+        return self.source
+
     def get_destination(self):
         return self.destination
 
-    def get_payload(self):
-        return self.payload
+    def get_convo_id(self):
+        return self.convo_id
+
+    def get_data(self):
+        return self.data
 
     def get_signature(self):
         return self.signature
 
 
-class Packet_Data:
+class Decrypted_Packet:
 
-    """Defines the data format (payload) in the packet
+    """Defines master packet format (decrypted)
 
-    This will be encrypted for sending, or decrypted when received.
+    This will be the object that will contain all decrypted information
 
     Args:
-        packet_type: Type of packet (A, C, or M thus far)
-        source:      8 Hex character source
-        data:        Symmetric key to use for future communications
+        packet_type: Type of packet (A, S, or M currently)
+        source:      Where the packet came from
+        convo_id:    Conversation ID (to know what convo this packet goes to)
+        data:        Data
     """
 
-    def __init__(self, packet_type, source, data):
+    def __init__(self,
+                 packet_type,
+                 source,
+                 convo_id,
+                 data):
         self.packet_type = packet_type
         self.source = source
+        self.convo_id = convo_id
         self.data = data
 
     def get_packet_type(self):
@@ -81,6 +104,9 @@ class Packet_Data:
 
     def get_source(self):
         return self.source
+
+    def get_convo_id(self):
+        return self.convo_id
 
     def get_data(self):
         return self.data
