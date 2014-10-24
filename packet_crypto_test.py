@@ -36,35 +36,54 @@ def test_everything():
     key_a = generate_key_pair()
     print "Generating key pair B..."
     key_b = generate_key_pair()
+
     print "Generating symmetric key..."
     symm = generate_symmetric_key()
     print symm
+    print ""
 
     print "Creating auth packet A->B..."
+    # This will be the packet sent to initiate a connection
     packet = gen_auth("A", "B", symm, key_b, key_a)
 
     print "Decrypting packet..."
-    recvd_packet = decrypt_packet_A(packet, key_b, key_a)
-    print recvd_packet
-    proposed_symm = recvd_packet.get_data()
+    decrypted_packet = decrypt_packet_A(packet, key_b, key_a)
+    # Get data from decrypted packet
+    proposed_symm = decrypted_packet.get_data()
     print "Received key:"
     print proposed_symm
+    print ""
 
     print "Creating command packet B->A..."
     packet = gen_command("B", "A", "accept", proposed_symm, key_b)
 
     print "Decrypting packet..."
-    recvd = decrypt_packet_S(packet, proposed_symm, key_b)
-    print "Received response:"
+    decrypted_packet = decrypt_packet_S(packet, proposed_symm, key_b)
+    # Get data from decrypted packet
+    recvd = decrypted_packet.get_data()
+    print "Received command:"
     print recvd
+    print ""
 
     print "Creating message packet A->B..."
     packet = gen_message("A", "B", "Hello World!", proposed_symm, key_a)
 
     print "Decrypting packet..."
-    recvd = decrypt_packet_S(packet, proposed_symm, key_a)
-    print "Received response:"
+    decrypted_packet = decrypt_packet_S(packet, proposed_symm, key_a)
+    # Get data from decrypted packet
+    recvd = decrypted_packet.get_data()
+    print "Received message:"
     print recvd
+    print ""
+
+    print "Creating message packet B->A..."
+    packet = gen_message("B", "A", "Hello World!", proposed_symm, key_a)
+
+    print "Decrypting packet with incorrect signature..."
+    decrypted_packet = decrypt_packet_S(packet, proposed_symm, key_b)
+    print "Verify result:"
+    print decrypted_packet
+    print ""
 
 
 test_everything()

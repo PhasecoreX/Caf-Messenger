@@ -28,6 +28,7 @@ Makes encryption and packet generation even easier!
 """
 from crypto import *
 from packet import *
+import cPickle as pickle
 
 
 def gen_message(source, dest, message, encrypt_key, sign_key):
@@ -44,8 +45,8 @@ def gen_message(source, dest, message, encrypt_key, sign_key):
         Packet object ready for sending
     """
     data = Packet_Data("M", source, message)
-    encrypt_data = encrypt_message(encrypt_key, data)
-    signature = sign(sign_key, "M" + dest + encrypt_data)
+    encrypt_data = encrypt_message(encrypt_key, pickle.dumps(data))
+    signature = sign(sign_key, "M" + dest + pickle.dumps(encrypt_data))
     return Packet("M", dest, encrypt_data, signature)
 
 
@@ -63,8 +64,8 @@ def gen_command(source, dest, command, encrypt_key, sign_key):
         Packet object ready for sending
     """
     data = Packet_Data("C", source, command)
-    encrypt_data = encrypt_message(encrypt_key, data)
-    signature = sign(sign_key, "C" + dest + encrypt_data)
+    encrypt_data = encrypt_message(encrypt_key, pickle.dumps(data))
+    signature = sign(sign_key, "C" + dest + pickle.dumps(encrypt_data))
     return Packet("C", dest, encrypt_data, signature)
 
 
@@ -82,8 +83,8 @@ def gen_auth(source, dest, proposed_key, encrypt_key, sign_key):
         Packet object ready for sending
     """
     data = Packet_Data("A", source, proposed_key)
-    encrypt_data = encrypt_auth(encrypt_key, data)
-    signature = sign(sign_key, "A" + dest + encrypt_data)
+    encrypt_data = encrypt_auth(encrypt_key, pickle.dumps(data))
+    signature = sign(sign_key, "A" + dest + pickle.dumps(encrypt_data))
     return Packet("A", dest, encrypt_data, signature)
 
 
@@ -100,9 +101,9 @@ def decrypt_packet_A(packet, private_key, sender_key):
     """
     to_verify = (packet.get_packet_type() +
                  packet.get_destination() +
-                 packet.get_payload())
+                 pickle.dumps(packet.get_payload()))
     if verify(sender_key, to_verify, packet.get_signature()):
-        return decrypt_auth(private_key, packet.get_payload())
+        return pickle.loads(decrypt_auth(private_key, packet.get_payload()))
     return False
 
 
@@ -119,7 +120,7 @@ def decrypt_packet_S(packet, encrypt_key, sender_key):
     """
     to_verify = (packet.get_packet_type() +
                  packet.get_destination() +
-                 packet.get_payload())
+                 pickle.dumps(packet.get_payload()))
     if verify(sender_key, to_verify, packet.get_signature()):
-        return decrypt_message(encrypt_key, packet.get_payload())
+        return pickle.loads(decrypt_message(encrypt_key, packet.get_payload()))
     return False
