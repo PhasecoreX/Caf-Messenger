@@ -10,7 +10,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import Tkinter as tk
-
+from CafeChatPanel import ChatPanel
 
 class MainFrame(tk.Tk):
     """
@@ -82,9 +82,8 @@ class MainFrame(tk.Tk):
         self.conn = conn
         self.controller = controller
         self.container_frame = tk.Frame(self)
-        self.menubar = MainMenu(self)
         self.chat = ChatPanel(self)
-        self.friends = FriendsPanel(self)
+        self.friends = FriendPanel(self)
 
         self.title("Cafe")
         self.maxsize(800, 630)
@@ -94,5 +93,5 @@ class MainFrame(tk.Tk):
         self.create_panels()
 
 if __name__ == "__main__":
-    top = MainFrame()
+    top = MainFrame(None, None)
     top.mainloop()

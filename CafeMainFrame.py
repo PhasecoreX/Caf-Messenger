@@ -11,8 +11,8 @@
 #
 #
 
-from CafeFriendFrameS1 import FriendsPanel
-from CafeChatFrameS1 import ChatPanel
+from CafeFriendPanel import FriendsPanel
+from CafeChatPanel import ChatPanel
 from CafeMainMenuBar import MainMenu
 import Tkinter as tk
 

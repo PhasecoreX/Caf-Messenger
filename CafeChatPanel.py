@@ -1,6 +1,6 @@
 import Tkinter as tk
 
-class ChatPanel(tk.Frame):
+class ChatPanel(tk.TopLevel):
     """
     """
     def create_widgets(self, parent):
@@ -88,7 +88,7 @@ class ChatPanel(tk.Frame):
     def __init__(self, parent):
         """
         """
-        tk.Frame.__init__(self, parent)
+        tk.TopLevel.__init__(self, parent)
         self.parent = parent
         self.namelabel = tk.Label(self)
         self.textarea = tk.Text(self)
