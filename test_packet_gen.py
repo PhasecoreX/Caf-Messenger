@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  crypto_test.py
+#  test_crypto.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #
@@ -23,11 +23,11 @@
 #
 """packet_crypto_test.py
 
-Tests packet_crypto
+Tests packet_gen
 """
 
 from crypto import generate_key_pair, generate_symmetric_key
-from packet_crypto import gen_auth, decrypt_packet_A, gen_command,\
+from packet_gen import gen_auth, decrypt_packet_A, gen_command,\
     decrypt_packet_S, gen_message
 
 

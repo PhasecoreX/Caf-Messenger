@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  crypto_test.py
+#  test_crypto.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #
@@ -28,11 +28,11 @@ Makes encryption and packet generation even easier!
 
 from crypto import encrypt_message, sign, encrypt_auth, verify, decrypt_message,\
     decrypt_auth
-from packet import *
+from packet import Packet, Decrypted_Packet
 import cPickle as pickle
 
 
-def gen_message(source, dest, convo_id, message, encrypt_key, sign_key):
+def gen_message_packet(source, dest, convo_id, message, encrypt_key, sign_key):
     """Creates a packet with data for message sending
 
     Args:
@@ -55,7 +55,7 @@ def gen_message(source, dest, convo_id, message, encrypt_key, sign_key):
     return Packet("M", e_source, dest, convo_id, e_message, signature)
 
 
-def gen_command(source, dest, convo_id, command, encrypt_key, sign_key):
+def gen_command_packet(source, dest, convo_id, command, encrypt_key, sign_key):
     """Creates a packet with data for command sending
 
     Args:
@@ -78,7 +78,8 @@ def gen_command(source, dest, convo_id, command, encrypt_key, sign_key):
     return Packet("M", e_source, dest, convo_id, e_command, signature)
 
 
-def gen_auth(source, dest, convo_id, proposed_key, encrypt_key, sign_key):
+def gen_auth_packet(source, dest, convo_id, proposed_key,
+                    encrypt_key, sign_key):
     """Creates a packet with data for initializing a communication line
 
     Args:

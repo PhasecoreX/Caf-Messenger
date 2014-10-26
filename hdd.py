@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  crypto_test.py
+#  test_crypto.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #
@@ -25,13 +25,18 @@
 
 Functions to manage hard drive access.
 """
+
 import os
+import shutil
 PRIVATE_KEY = "user.pem"
 # No support for Windows just yet...
 # We would be saving in %User%\AppData\Roaming\cafe
 HOME_DIR = os.path.expanduser("~/.config/cafe")
 # We will put an if statement for "\" Windows paths
 SLASH = "/"
+# Other stuff
+FRIENDS = "friends"
+F_END = ".pem"
 
 
 def get_profile_list():
@@ -69,7 +74,7 @@ def create_profile(name):
     if os.path.isdir(path):
         return False
     try:
-        os.makedirs(path)
+        os.makedirs(path + SLASH + FRIENDS)
     except OSError:
         if not os.path.isdir(path):
             raise
@@ -89,3 +94,123 @@ def get_profile_key(name):
     if os.path.isfile(path):
         return path
     return False
+
+
+def delete_profile(name):
+    """Deletes a profile
+
+    Args:
+        name: Profile name to delete
+
+    Returns:
+        True if deleted
+        False if error/profile doesn't exists
+    """
+    path = HOME_DIR + SLASH + name
+    try:
+        shutil.rmtree(path)
+    except:
+        return False
+    return True
+
+
+def get_friend_list(name):
+    """Looks up all friends you have
+
+    Args:
+        name: Profile name to search for friends
+
+    Returns:
+        List of all friends for given user
+    """
+    path = HOME_DIR + SLASH + name + SLASH + FRIENDS
+    result = []
+    if not os.path.exists(path):
+        return False
+    for filename in os.listdir(path):
+        if os.path.isfile(path + SLASH + filename):
+            if filename.endswith(F_END):
+                result.append(filename)
+    return result
+
+
+def add_friend(name, friend_name, public_key):
+    """Adds a friend (helper)
+
+    Args:
+        name:        Profile name
+        friend_name: Name of friend
+
+    Returns:
+        True if written correctly
+        False if friend already exists
+    """
+    path = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
+            friend_name + F_END)
+    if os.path.isfile(path):
+        return False
+    writing = open(path, "w")
+    writing.write(public_key)
+    writing.close()
+    return True
+
+
+def load_friend(name, friend_name):
+    """Loads a friends public key file name, for further processing
+
+    Args:
+        name:        Profile name
+        friend_name: Name of friend
+
+    Returns:
+        Path to key file
+        False if friend does not exist
+    """
+    path = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
+            friend_name + F_END)
+    if os.path.isfile(path):
+        return path
+    return False
+
+
+def delete_friend(name, friend_name):
+    """Deletes a friend
+
+    Args:
+        name:        Profile name
+        friend_name: Friend to delete :(
+
+    Returns:
+        True if deleted
+        False if error/friend doesn't exists
+    """
+    path = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
+            friend_name + F_END)
+    try:
+        os.remove(path)
+    except:
+        return False
+    return True
+
+
+def rename_friend(name, friend_old, friend_new):
+    """Renames friend
+
+    Args:
+        name:       Profile name
+        friend_old: Friends old name
+        friend_new: Friends new name
+
+    Returns:
+        True on success
+        False on failure/friend not found
+    """
+    old = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
+           friend_old + F_END)
+    new = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
+           friend_new + F_END)
+    try:
+        os.rename(old, new)
+        return True
+    except:
+        return False

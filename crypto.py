@@ -104,7 +104,7 @@ def save_key(key, keyfile_path, password=None):
         True on success, False otherwise
 
     Raises:
-        IOError: An error occurred accessing the bigtable.Table object.
+        IOError: An error occurred writing file to disk
     """
     exported_key = key.exportKey('PEM', password, pkcs=1)
     try:
@@ -129,6 +129,10 @@ def load_key(keyfile_path, password=None):
 
     Returns:
         RSA key object (_RSAobj) containing public and/or private key
+
+    Raises:
+        IOError: File was not found
+        ValueError/IndexError/TypeError: Incorrect password/malformed file
     """
     try:
         return RSA.importKey(open(keyfile_path).read(), password)
