@@ -21,12 +21,14 @@
 #  MA 02110-1301, USA.
 #
 #
-
 """crypto_test.py
 
 For testing crypto.py
 """
-from crypto import *
+
+from crypto import generate_key_pair, get_public_key, sign, verify, save_key,\
+    load_key, encrypt_auth, decrypt_auth, encrypt_message, decrypt_message,\
+    get_public_key_string
 
 
 def bad_sign_test():
@@ -181,8 +183,8 @@ def encrypt_test():
 
 def sym_cipher_test():
     """Encrypt and decrypt AES"""
-    key = b'0123456789012345'
-    encrypted = encrypt_message(key, "Test")
+    key = b'01234567890123450123456789012345'
+    encrypted = encrypt_message(key, "poop")
     print encrypted
     print decrypt_message(key, encrypted)
 
@@ -214,4 +216,4 @@ def test_pub_key_save_load():
     print verify(pub_b, "lalala", test)
 
 
-test_pub_key_save_load()
+sym_cipher_test()
