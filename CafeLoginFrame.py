@@ -43,9 +43,10 @@ class LoginPanel(tk.Frame):
         message = message + "If you are a new user, please click 'New User'"
         self.mainLabel.config(text=message)
         self.mainLabel.place(x=15, y=15, anchor="nw", width=350, height=30)
-
-        self.nameMenu.config(width=205, height=30)
-        self.nameMenu.place(x=120, y=60, anchor="nw", width=205, height=30)
+        
+        self.deleteusrButton.config(text="Delete", width=100, height=30)
+        self.deleteusrButton.config(command=self.deleteButtonPress)
+        self.deleteusrButton.place(x=330, y=60, anchor="nw", width=100, height=30)
 
         self.passEntry.config(width=205)
         self.passEntry.place(x=120, y=105, anchor="nw", width=205, height=30)
@@ -88,30 +89,32 @@ class LoginPanel(tk.Frame):
         self.newusrButton.config(state="disabled")
         t = NewUserWindow(self)
         
+    def deleteButtonPress(self):
+        print "Goodbye " + self.var.get() + "."
+        crypto.delete_profile(self.var.get())
+        self.updateList()
+        
     def updateList(self):
-        self.names = self.PopulateNameMenu()
-        self.var = tk.StringVar(self)
-        self.var.set(self.names[0])
-        self.nameMenu = apply(
-            tk.OptionMenu, (self, self.var) + tuple(self.names))
         self.newusrButton.config(state="normal")
-        self.nameMenu.config(width=205, height=30)
-        self.nameMenu.place(x=120, y=60, anchor="nw", width=205, height=30)
-        if self.var.get() != "[Empty]":
-            self.loginButton.config(state="normal")
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-
         self.names = self.PopulateNameMenu()
         self.var = tk.StringVar(self)
         if not self.names:
             self.names.append("[Empty]")
-
         self.var.set(self.names[0])
         self.nameMenu = apply(
             tk.OptionMenu, (self, self.var) + tuple(self.names))
-        
+        self.nameMenu.config(width=205, height=30)
+        self.nameMenu.place(x=120, y=60, anchor="nw", width=205, height=30)
+        if self.var.get() != "[Empty]":
+            self.loginButton.config(state="normal")
+        else:
+            self.loginButton.config(state="disabled")
+
+    def noNewUser(self):
+        self.newusrButton.config(state="normal")
+    
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
         self.parent = parent
         self.mainLabel = tk.Label(self)
         self.passEntry = tk.Entry(self)
@@ -120,6 +123,8 @@ class LoginPanel(tk.Frame):
         self.errLabel = tk.Label(self)
         self.loginButton = tk.Button(self)
         self.newusrButton = tk.Button(self)
+        self.deleteusrButton = tk.Button(self)
+        self.updateList()
         self.CreateWidgets(self, controller)
 
 

@@ -35,23 +35,29 @@ class NewUserWindow(tk.Toplevel):
                              height=30)
         
         self.statuslabel.config(text="", height=65, width=215)
-        self.statuslabel.place(x=5, y=130, anchor="nw", width=290, height=215)
+        self.statuslabel.place(x=5, y=130, anchor="nw", width=290, height=65)
     
     def createButtonPressed(self):
+        if self.nameentry.get() == "[Empty]":
+            print "You're THAT kind of person."
+            return 'break'
         if crypto.create_profile(self.nameentry.get(), self.passentry.get()):
             self.master.updateList()
             self.destroy()
         else:
-            self.nameentry.delete(1.0, "end")
-            self.passentry.delete(1.0, "end")
+            self.nameentry.delete(0, "end")
+            self.passentry.delete(0, "end")
             self.statuslabel.config(text="Username already exists.")
-        
+
+    def quit(self):
+        self.master.noNewUser()
+        self.destroy()
 
     def __init__(self, master):
         tk.Toplevel.__init__(self, master)
         self.maxsize(420, 200)
         self.minsize(420, 200)
-        self.title("Child :D")
+        self.title("New User")
         self.namelabel = tk.Label(self)
         self.passlabel = tk.Label(self)
         self.statuslabel = tk.Label(self)
@@ -59,4 +65,5 @@ class NewUserWindow(tk.Toplevel):
         self.passentry = tk.Entry(self)
         self.master = master
         self.createButton = tk.Button(self)
+        self.protocol('WM_DELETE_WINDOW', self.quit)
         self.createWidgets()
