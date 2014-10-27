@@ -28,7 +28,7 @@ Definitions for packet format. To be sent over the network.
 """
 
 
-class Packet:
+class Packet(object):
 
     """Defines master packet format
 
@@ -58,25 +58,31 @@ class Packet:
         self.signature = signature
 
     def get_packet_type(self):
+        """Gets packet type (not encrypted) from encrypted packet"""
         return self.packet_type
 
     def get_source(self):
+        """Gets source (encrypted) from encrypted packet"""
         return self.source
 
     def get_destination(self):
+        """Gets destination (not encrypted) from encrypted packet"""
         return self.destination
 
     def get_convo_id(self):
+        """Gets ConvoID (not encrypted) from encrypted packet"""
         return self.convo_id
 
     def get_data(self):
+        """Gets data (encrypted) from encrypted packet"""
         return self.data
 
     def get_signature(self):
+        """Gets signature (not encrypted) from encrypted packet"""
         return self.signature
 
 
-class Decrypted_Packet:
+class DecryptedPacket(object):
 
     """Defines master packet format (decrypted)
 
@@ -100,13 +106,17 @@ class Decrypted_Packet:
         self.data = data
 
     def get_packet_type(self):
+        """Gets packet type from decrypted packet"""
         return self.packet_type
 
     def get_source(self):
+        """Gets source from decrypted packet"""
         return self.source
 
     def get_convo_id(self):
+        """Gets ConvoID from decrypted packet"""
         return self.convo_id
 
     def get_data(self):
+        """Gets data from decrypted packet"""
         return self.data
