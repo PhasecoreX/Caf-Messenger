@@ -101,9 +101,9 @@ def decrypt_packet(packet_type, packet, encrypt_key, sender_key):
         Decrypted_Packet object ready for parsing
     """
     if packet_type.equals("A"):
-        return packet_gen.decrypt_packet_A(packet, encrypt_key, sender_key)
+        return packet_gen.decrypt_packet_a(packet, encrypt_key, sender_key)
     if packet_type.equals("M") or packet_type.equals("C"):
-        return packet_gen.decrypt_packet_S(packet, encrypt_key, sender_key)
+        return packet_gen.decrypt_packet_s(packet, encrypt_key, sender_key)
 
 
 def get_profile_list():
@@ -207,8 +207,8 @@ def add_friend(name, friend_name, public_key):
         False if friend exists
 
     Raises:
-        IOError:                           File could not be written
-        ValueError, IndexError, TypeError: Malformed string
+        IOError:    File could not be written
+        ValueError: Malformed string
     """
     try:
         success = hdd.add_friend(name, friend_name, public_key)
@@ -218,7 +218,7 @@ def add_friend(name, friend_name, public_key):
         return False
     if load_friend(name, friend_name) is False:
         delete_friend(name, friend_name)
-        return False
+        raise ValueError
     return True
 
 
@@ -231,15 +231,21 @@ def load_friend(name, friend_name):
 
     Returns:
         RSA key object (_RSAobj) containing friends public key
-        False if friend does not exist/friend file is corrupt
+        False if friend does not exist
+
+    Raises:
+        ValueError, IndexError, TypeError: File corrupt.
     """
     path = hdd.load_friend(name, friend_name)
     if path is False:
         return False
     try:
         return crypto.load_key(path)
-    except:
+    except IOError:
         return False
+    except (ValueError, IndexError, TypeError):
+        raise
+    return True
 
 
 def delete_friend(name, friend_name):
