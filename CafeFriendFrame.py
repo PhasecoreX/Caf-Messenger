@@ -36,9 +36,6 @@ class MainFrame(tk.Tk):
         self.maxsize(195, 620)
         self.minsize(195, 620)
         self.createPanels()
-
-    def chat_button_pressed(self, name):
-        
         
 
 if __name__ == "__main__":

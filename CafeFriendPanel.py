@@ -47,7 +47,7 @@ class FriendPanel(tk.Frame):
     def chat_button_pressed(self):
         """
         """
-        self.parent.change_chat_name(self.flist.get("anchor"))
+        self.parent.chat(self.flist.get("anchor"))
 
     def remove_button_pressed(self):
         """

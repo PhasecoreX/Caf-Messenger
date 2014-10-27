@@ -1,10 +1,10 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#	CIS 467 Capstone Project - Cafe Messenger
-#	CafeGUIController.py
-#	Author: Michael Currie
-#	
-#	
-#	
+#   CIS 467 Capstone Project - Cafe Messenger
+#   CafeGUIController.py
+#   Author: Michael Currie
+#   
+#   
+#   
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 from CafeMainFrame import MainFrame
@@ -45,8 +45,24 @@ class GreeterFactory(ClientFactory):
     def buildProtocol(self, addr):
         return Greeter()
 
+class RSAObject():
+    def amend(self, RSAObject):
+        self.Object = RSAObject
+    
+    def get(self):
+        return self.Object
+
+    def __init__(self):
+        self.Object = None
+
 
 if __name__ == "__main__":
+    this = RSAObject()
+    top = LoginFrame(this)
+    top.mainloop()
+    if this.get() is None:
+        quit()
+    
     factory = GreeterFactory()
     conn = reactor.connectTCP(HOST, PORT, GreeterFactory())
     top = MainFrame(None, conn)

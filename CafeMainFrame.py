@@ -11,11 +11,11 @@
 #
 #
 
-from CafeFriendPanel import FriendsPanel
+from CafeFriendPanel import FriendPanel
 from CafeChatPanel import ChatPanel
 from CafeMainMenuBar import MainMenu
 import Tkinter as tk
-
+import random as rndm
 from twisted.internet import reactor
 
 import crypto
@@ -37,16 +37,40 @@ class MainFrame(tk.Tk):
         # Display the menu
         self.config(menu=self.menubar)
 
-        # Create and place the Chat Panel
-        self.chat.config(width=590, height=590)
-        self.chat.place(x=5, y=5, anchor="nw")
-
         # Create and place the Friends List
         self.friends.config(width=190, height=590)
-        self.friends.place(x=605, y=5, anchor="nw")
+        self.friends.place(x=5, y=5, anchor="nw")
 
     def quit(self):
         reactor.stop()
+
+    def chat(self, name):
+        flag = True
+        number = -1
+        while flag:
+            number = number + 1
+            try:
+                self.winlist[number]
+            except KeyError:
+                t = ChatPanel(self, name, number)
+                self.winlist[number] = t
+                print number
+                flag = False
+        """
+        flag = True
+        while flag:
+            number = rndm.randrange(10000)
+            try:
+                self.winlist[number]
+            except KeyError:
+                t = ChatPanel(self, name, number)
+                self.winlist[number] = t
+                print number
+                flag = False
+        """
+        
+        
+        
 
     def append_message(self, name, message):
         """This method sends a message and name to the chat panel.
@@ -55,7 +79,12 @@ class MainFrame(tk.Tk):
         It sends a name and a message to be appended on the textarea.
 
         """
-        self.chat.text_area_append(name, message)
+        try:
+            self.winlist[0].text_area_append(message)
+        except IndexError:
+            print "This simulates a friend trying to talk to the client."
+        except:
+            print "This means the client closed the window"
 
     def change_chat_name(self, name):
         """This method sends a name to the chat panel to be changed.
@@ -65,7 +94,7 @@ class MainFrame(tk.Tk):
         """
         self.chat.change_chat_name(name)
 
-    def send(self, message):
+    def send(self, message, num):
         """This method receives a message from its chat child and forwards it.
 
         This is a callback chain specific method. It will receive a message
@@ -90,16 +119,17 @@ class MainFrame(tk.Tk):
         print "\nWelcome to CAFE Messenger! (debug mode)\n"
         tk.Tk.__init__(self, *args, **kwargs)
         self.key = b'01234567890123450123456789012345'
+        self.chatCount = 0
+        self.winlist = {}
         self.conn = conn
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = MainMenu(self)
-        self.chat = ChatPanel(self)
-        self.friends = FriendsPanel(self)
+        self.friends = FriendPanel(self)
 
         self.title("Cafe")
-        self.maxsize(800, 630)
-        self.minsize(800, 630)
+        self.maxsize(200, 630)
+        self.minsize(200, 630)
 
         self.protocol('WM_DELETE_WINDOW', self.quit)
         self.create_panels()
