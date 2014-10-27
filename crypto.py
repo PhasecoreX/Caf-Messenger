@@ -55,6 +55,16 @@ def generate_key_pair():
     return RSA.generate(keysize)
 
 
+def generate_symmetric_key():
+    """Generates a symmetric 256 bit AES key
+
+    Returns:
+        String (I think?)
+    """
+    keysize = 32
+    return Random.new().read(keysize)
+
+
 def get_public_key(private_key):
     """Extracts the public key from a full key pair
 
@@ -94,7 +104,7 @@ def save_key(key, keyfile_path, password=None):
         True on success, False otherwise
 
     Raises:
-        IOError: An error occurred accessing the bigtable.Table object.
+        IOError: An error occurred writing file to disk
     """
     exported_key = key.exportKey('PEM', password, pkcs=1)
     try:
@@ -119,6 +129,10 @@ def load_key(keyfile_path, password=None):
 
     Returns:
         RSA key object (_RSAobj) containing public and/or private key
+
+    Raises:
+        IOError: File was not found
+        ValueError/IndexError/TypeError: Incorrect password/malformed file
     """
     try:
         return RSA.importKey(open(keyfile_path).read(), password)
@@ -211,6 +225,7 @@ def encrypt_message(key, message):
     Args:
         key:     Key used for encrypting.
                  Keys can be 128, 192, or 256 bits long (we will use 256)
+                 (That's 16, 24, and 32 characters)
         message: Message to encrypt
 
     Returns:
