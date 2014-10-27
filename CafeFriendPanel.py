@@ -1,8 +1,8 @@
 import Tkinter as tk
 
-class FriendsPanel(tk.Frame):
+class FriendPanel(tk.Frame):
 
-    def create_widgets(self, parent):
+    def create_widgets(self):
         """
         """
         self.fheader.config(text="My Friendlist")
@@ -66,4 +66,4 @@ class FriendsPanel(tk.Frame):
         self.removebutton = tk.Button(self)
         self.friendentry = tk.Text(self)
         self.chatbutton = tk.Button(self)
-        self.create_widgets(parent)
+        self.create_widgets()
