@@ -23,6 +23,7 @@ import crypto
 HOST = ''
 PORT = 1025
 
+
 class MainFrame(tk.Tk):
     """
     """
@@ -33,7 +34,7 @@ class MainFrame(tk.Tk):
 
         self.container_frame.config(width=800, height=630)
         self.container_frame.place(x=0, y=0, anchor="nw")
-        
+
         # Display the menu
         self.config(menu=self.menubar)
 
@@ -68,9 +69,6 @@ class MainFrame(tk.Tk):
                 print number
                 flag = False
         """
-        
-        
-        
 
     def append_message(self, name, message):
         """This method sends a message and name to the chat panel.
@@ -105,8 +103,8 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
 
         """
-        
-        #Chop off the \n
+
+        # Chop off the \n
         print "Encrypting:\n" + message[:-1]
         emsg = crypto.encrypt_message(self.key, message[:-1])
         self.conn.transport.write(emsg + "\r\n")

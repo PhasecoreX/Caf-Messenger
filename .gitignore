@@ -55,6 +55,7 @@ target/
 
 #swps
 *.swp
+*.kate-swp
 
 #Rope
 .ropeproject

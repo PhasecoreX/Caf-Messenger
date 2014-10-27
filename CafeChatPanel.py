@@ -52,10 +52,10 @@ class ChatPanel(tk.Toplevel):
 
     def send_button_pressed(self):
         """This method is called when the send button is pressed.
-        
+
         This will send the message to the panel's parent, who has
         its own callback method to send to the controller.
-        
+
         """
         message = self.textentry.get(1.0, "end")
         self.parent.send(message, self.chatID)
