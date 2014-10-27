@@ -10,3 +10,53 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import Tkinter as tk
+
+import crypto_controller as crypto
+
+class NewUserWindow(tk.Toplevel):
+    def createWidgets(self):
+        self.namelabel.config(text="Please enter a Username:")
+        self.namelabel.config(width=200, height=40)
+        self.namelabel.place(x=5, y=5, anchor="nw", width=200, height=40)
+        
+        self.nameentry.config(width=200)
+        self.nameentry.place(x=210, y=5, anchor="nw", width=200, height=40)
+        
+        self.passlabel.config(text="Please enter a Password:")
+        self.passlabel.config(width=200, height=40)
+        self.passlabel.place(x=5, y=50, anchor="nw", width=200, height=40)
+        
+        self.passentry.config(width=200)
+        self.passentry.place(x=210, y=50, anchor="nw", width=200, height=40)
+        
+        self.createButton.config(command=self.createButtonPressed)
+        self.createButton.config(text="Create User")
+        self.createButton.place(x=5, y=95, anchor="nw", width=80,
+                             height=30)
+        
+        self.statuslabel.config(text="", height=65, width=215)
+        self.statuslabel.place(x=5, y=130, anchor="nw", width=290, height=215)
+    
+    def createButtonPressed(self):
+        if crypto.create_profile(self.nameentry.get(), self.passentry.get()):
+            self.master.updateList()
+            self.destroy()
+        else:
+            self.nameentry.delete(1.0, "end")
+            self.passentry.delete(1.0, "end")
+            self.statuslabel.config(text="Username already exists.")
+        
+
+    def __init__(self, master):
+        tk.Toplevel.__init__(self, master)
+        self.maxsize(420, 200)
+        self.minsize(420, 200)
+        self.title("Child :D")
+        self.namelabel = tk.Label(self)
+        self.passlabel = tk.Label(self)
+        self.statuslabel = tk.Label(self)
+        self.nameentry = tk.Entry(self)
+        self.passentry = tk.Entry(self)
+        self.master = master
+        self.createButton = tk.Button(self)
+        self.createWidgets()

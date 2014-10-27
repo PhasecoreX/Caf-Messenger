@@ -42,12 +42,15 @@ F_END = ".pem"
 def get_profile_list():
     """Looks up all profiles you have created
 
+    Run this first to create the config directory!
     Only returns profiles with a user.pem file (private key) inside of them.
 
     Returns:
         List of all currently available profiles
     """
     result = []
+    if not os.path.exists(HOME_DIR):
+        return result
     for filename in os.listdir(HOME_DIR):
         if os.path.exists(HOME_DIR + SLASH + filename + SLASH + PRIVATE_KEY):
             result.append(filename)
@@ -89,6 +92,7 @@ def get_profile_key(name):
 
     Returns:
         Absolute path to that private key
+        False if profile was not found
     """
     path = HOME_DIR + SLASH + name + SLASH + PRIVATE_KEY
     if os.path.isfile(path):
@@ -109,7 +113,7 @@ def delete_profile(name):
     path = HOME_DIR + SLASH + name
     try:
         shutil.rmtree(path)
-    except:
+    except OSError:
         return False
     return True
 
@@ -126,7 +130,7 @@ def get_friend_list(name):
     path = HOME_DIR + SLASH + name + SLASH + FRIENDS
     result = []
     if not os.path.exists(path):
-        return False
+        return result
     for filename in os.listdir(path):
         if os.path.isfile(path + SLASH + filename):
             if filename.endswith(F_END):
@@ -144,15 +148,21 @@ def add_friend(name, friend_name, public_key):
     Returns:
         True if written correctly
         False if friend already exists
+
+    Raises:
+        IOError: Can't write to disk
     """
     path = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
             friend_name + F_END)
     if os.path.isfile(path):
         return False
-    writing = open(path, "w")
-    writing.write(public_key)
-    writing.close()
-    return True
+    try:
+        writing = open(path, "w")
+        writing.write(public_key)
+        writing.close()
+        return True
+    except:
+        raise
 
 
 def load_friend(name, friend_name):
@@ -182,13 +192,13 @@ def delete_friend(name, friend_name):
 
     Returns:
         True if deleted
-        False if error/friend doesn't exists
+        False if OSError/friend doesn't exists
     """
     path = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
             friend_name + F_END)
     try:
         os.remove(path)
-    except:
+    except OSError:
         return False
     return True
 
@@ -203,7 +213,7 @@ def rename_friend(name, friend_old, friend_new):
 
     Returns:
         True on success
-        False on failure/friend not found
+        False on OSError/friend not found
     """
     old = (HOME_DIR + SLASH + name + SLASH + FRIENDS + SLASH +
            friend_old + F_END)
@@ -211,6 +221,6 @@ def rename_friend(name, friend_old, friend_new):
            friend_new + F_END)
     try:
         os.rename(old, new)
-        return True
-    except:
+    except OSError:
         return False
+    return True

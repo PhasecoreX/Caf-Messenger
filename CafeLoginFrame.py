@@ -12,7 +12,8 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import Tkinter as tk
-
+import crypto_controller as crypto
+from CafeNewUserFrame import NewUserWindow
 
 class LoginFrame(tk.Tk):
 
@@ -20,9 +21,14 @@ class LoginFrame(tk.Tk):
         self.login = LoginPanel(self, self)
         self.login.config(width=600, height=400)
         self.login.place(x=0, y=0, anchor="nw")
+        
+    def success(self, KeyObject):
+        self.RSA.amend(KeyObject)
+        self.destroy()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, RSAObject, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        self.RSA = RSAObject
         self.login = LoginPanel(self, self)
         self.title("Cafe Login")
         self.maxsize(600, 400)
@@ -40,7 +46,6 @@ class LoginPanel(tk.Frame):
 
         self.nameMenu.config(width=205, height=30)
         self.nameMenu.place(x=120, y=60, anchor="nw", width=205, height=30)
-        self.PopulateNameMenu()
 
         self.passEntry.config(width=205)
         self.passEntry.place(x=120, y=105, anchor="nw", width=205, height=30)
@@ -54,6 +59,8 @@ class LoginPanel(tk.Frame):
         self.errLabel.config(width=290, height=30, text="")
         self.errLabel.place(x=15, y=150, anchor="nw", width=290, height=60)
 
+        if self.var.get() == "[Empty]":
+            self.loginButton.config(state="disabled")
         self.loginButton.config(width=100, height=30, text="Login")
         self.loginButton.config(command=self.LoginButtonPress)
         self.loginButton.place(x=200, y=195, anchor="nw", width=100, height=30)
@@ -66,25 +73,46 @@ class LoginPanel(tk.Frame):
         errLabel.config(text="Invalid Username or Password.")
 
     def PopulateNameMenu(self):
-        # Obviously incomplete, combine work with Public Key storage for login.
-        nameList = ["Mark", "Mike", "Ryan", "Christian"]
+        nameList = crypto.get_profile_list()
         return nameList
 
     def LoginButtonPress(self):
-        print "lol login"
+        flag = crypto.load_profile(self.var.get(), self.passEntry.get())
+        if flag is not False:
+            self.parent.success(flag)
+            print "Login Success!"
+        else:
+            print "Nope."
 
     def NewUserButtonPress(self):
-        print "omg hai new usr"
+        self.newusrButton.config(state="disabled")
+        t = NewUserWindow(self)
+        
+    def updateList(self):
+        self.names = self.PopulateNameMenu()
+        self.var = tk.StringVar(self)
+        self.var.set(self.names[0])
+        self.nameMenu = apply(
+            tk.OptionMenu, (self, self.var) + tuple(self.names))
+        self.newusrButton.config(state="normal")
+        self.nameMenu.config(width=205, height=30)
+        self.nameMenu.place(x=120, y=60, anchor="nw", width=205, height=30)
+        if self.var.get() != "[Empty]":
+            self.loginButton.config(state="normal")
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
         self.names = self.PopulateNameMenu()
         self.var = tk.StringVar(self)
+        if not self.names:
+            self.names.append("[Empty]")
+
         self.var.set(self.names[0])
         self.nameMenu = apply(
             tk.OptionMenu, (self, self.var) + tuple(self.names))
-
+        
+        self.parent = parent
         self.mainLabel = tk.Label(self)
         self.passEntry = tk.Entry(self)
         self.nameLabel = tk.Label(self)

@@ -26,9 +26,9 @@
 Makes encryption and packet generation even easier!
 """
 
-from crypto import encrypt_message, sign, encrypt_auth, verify, decrypt_message,\
-    decrypt_auth
-from packet import Packet, Decrypted_Packet
+from crypto import encrypt_message, sign, encrypt_auth, verify,\
+    decrypt_message, decrypt_auth
+from packet import Packet, DecryptedPacket
 import cPickle as pickle
 
 
@@ -102,7 +102,7 @@ def gen_auth_packet(source, dest, convo_id, proposed_key,
     return Packet("M", e_source, dest, convo_id, e_proposed_key, signature)
 
 
-def decrypt_packet_S(packet, encrypt_key, sender_key):
+def decrypt_packet_s(packet, encrypt_key, sender_key):
     """Decrypts a packet encrypted with an AES key
 
     Args:
@@ -121,14 +121,14 @@ def decrypt_packet_S(packet, encrypt_key, sender_key):
     if verify(sender_key, to_verify, packet.get_signature()):
         d_source = decrypt_message(encrypt_key, packet.get_source())
         d_data = decrypt_message(encrypt_key, packet.get_data())
-        return Decrypted_Packet(packet.get_packet_type(),
-                                d_source,
-                                packet.get_convo_id(),
-                                d_data)
+        return DecryptedPacket(packet.get_packet_type(),
+                               d_source,
+                               packet.get_convo_id(),
+                               d_data)
     return False
 
 
-def decrypt_packet_A(packet, private_key, sender_key):
+def decrypt_packet_a(packet, private_key, sender_key):
     """Decrypts a packet encrypted with your public key
 
     Args:
@@ -147,8 +147,8 @@ def decrypt_packet_A(packet, private_key, sender_key):
     if verify(sender_key, to_verify, packet.get_signature()):
         d_source = decrypt_auth(private_key, packet.get_source())
         d_data = decrypt_auth(private_key, packet.get_data())
-        return Decrypted_Packet(packet.get_packet_type(),
-                                d_source,
-                                packet.get_convo_id(),
-                                d_data)
+        return DecryptedPacket(packet.get_packet_type(),
+                               d_source,
+                               packet.get_convo_id(),
+                               d_data)
     return False
