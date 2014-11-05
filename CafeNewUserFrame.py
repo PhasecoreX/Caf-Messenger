@@ -26,7 +26,7 @@ class NewUserWindow(tk.Toplevel):
         self.passlabel.config(width=200, height=40)
         self.passlabel.place(x=5, y=50, anchor="nw", width=200, height=40)
         
-        self.passentry.config(width=200)
+        self.passentry.config(width=200, show="*")
         self.passentry.place(x=210, y=50, anchor="nw", width=200, height=40)
         
         self.createButton.config(command=self.createButtonPressed)

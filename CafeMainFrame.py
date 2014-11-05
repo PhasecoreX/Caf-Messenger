@@ -80,9 +80,9 @@ class MainFrame(tk.Tk):
         try:
             self.winlist[0].text_area_append(message)
         except IndexError:
-            print "This simulates a friend trying to talk to the client."
+            print "Another friend is trying to reach the client."
         except:
-            print "This means the client closed the window"
+            print "A friend was previously chatting and the client closed out."
 
     def change_chat_name(self, name):
         """This method sends a name to the chat panel to be changed.

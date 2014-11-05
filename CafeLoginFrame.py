@@ -41,6 +41,7 @@ class LoginPanel(tk.Frame):
     def CreateWidgets(self, parent, controller):
         message = "Please select your username and enter your password.\n"
         message = message + "If you are a new user, please click 'New User'"
+        
         self.mainLabel.config(text=message)
         self.mainLabel.place(x=15, y=15, anchor="nw", width=350, height=30)
         
@@ -48,8 +49,10 @@ class LoginPanel(tk.Frame):
         self.deleteusrButton.config(command=self.deleteButtonPress)
         self.deleteusrButton.place(x=330, y=60, anchor="nw", width=100, height=30)
 
-        self.passEntry.config(width=205)
+        self.passEntry.config(width=205, show="*")
         self.passEntry.place(x=120, y=105, anchor="nw", width=205, height=30)
+        self.passEntry.bind("<KeyPress-Return>", self.enterKeyPress)
+        self.passEntry.focus_set()
 
         self.nameLabel.config(width=80, height=30, text="Name:")
         self.nameLabel.place(x=15, y=60, anchor="nw", width=80, height=30)
@@ -58,20 +61,21 @@ class LoginPanel(tk.Frame):
         self.passLabel.place(x=15, y=105, anchor="nw", width=80, height=30)
 
         self.errLabel.config(width=290, height=30, text="")
-        self.errLabel.place(x=15, y=150, anchor="nw", width=290, height=60)
+        self.errLabel.config(fg="red", font=("Tk", 12))
+        self.errLabel.place(x=15, y=140, anchor="nw", width=290, height=60)
 
         if self.var.get() == "[Empty]":
             self.loginButton.config(state="disabled")
         self.loginButton.config(width=100, height=30, text="Login")
         self.loginButton.config(command=self.LoginButtonPress)
+        
         self.loginButton.place(x=200, y=195, anchor="nw", width=100, height=30)
-
         self.newusrButton.config(width=100, height=30, text="New User")
         self.newusrButton.config(command=self.NewUserButtonPress)
         self.newusrButton.place(x=45, y=195, anchor="nw", width=100, height=30)
 
     def LoginError(self):
-        errLabel.config(text="Invalid Username or Password.")
+        self.errLabel.config(text="Invalid Username or Password.")
 
     def PopulateNameMenu(self):
         nameList = crypto.get_profile_list()
@@ -81,16 +85,18 @@ class LoginPanel(tk.Frame):
         flag = crypto.load_profile(self.var.get(), self.passEntry.get())
         if flag is not False:
             self.parent.success(flag)
-            print "Login Success!"
         else:
-            print "Nope."
+            self.passEntry.delete(0, "end")
+            self.LoginError()
+    
+    def enterKeyPress(self, event):
+        self.LoginButtonPress()
 
     def NewUserButtonPress(self):
         self.newusrButton.config(state="disabled")
         t = NewUserWindow(self)
         
     def deleteButtonPress(self):
-        print "Goodbye " + self.var.get() + "."
         crypto.delete_profile(self.var.get())
         self.updateList()
         
