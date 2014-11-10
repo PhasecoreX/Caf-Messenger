@@ -13,28 +13,24 @@ class FriendPanel(tk.Frame):
         self.flist.config(width=185, height=505)
         self.flist.place(x=0, y=25, anchor="nw", width=185, height=505)
 
-        self.friendentry.config(width=90, height=20)
-        self.friendentry.place(x=0, y=535, anchor="nw", width=90,
-                               height=20)
-        self.friendentry.bind("<Return>", self.enter_key_pressed)
-
         self.addbutton.config(text="Add Friend", width=90, height=20)
         self.addbutton.config(command=self.add_button_pressed)
-        self.addbutton.place(x=95, y=535, anchor="nw", width=90,
+        self.addbutton.place(x=0, y=535, anchor="nw", width=185,
                              height=20)
 
         self.chatbutton.config(text="Chat", width=90, height=20)
         self.chatbutton.config(command=self.chat_button_pressed)
         self.chatbutton.place(x=0, y=560, anchor="nw", width=90,
                               height=20)
+        print self.flist.get("anchor")
 
         self.removebutton.config(text="Remove", width=90, height=20)
         self.removebutton.config(command=self.remove_button_pressed)
         self.removebutton.place(x=95, y=560, anchor="nw", width=90,
                                 height=20)
-
-    def enter_key_pressed(self):
-        return 'break'
+        if (self.flist.get(0) is ""):
+            self.chatbutton.config(state="disabled")
+            self.removebutton.config(state="disabled")
 
     def add_button_pressed(self):
         """
@@ -44,10 +40,9 @@ class FriendPanel(tk.Frame):
     def add_friend(self, name):
         """
         """
-        print "Such Friend! Wow."
-        name = name[:-1]
         self.flist.insert("end", name)
-        self.friendentry.delete(1.0, "end")
+        self.chatbutton.config(state="normal")
+        self.removebutton.config(state="normal")
 
     def chat_button_pressed(self):
         """
@@ -57,10 +52,13 @@ class FriendPanel(tk.Frame):
     def remove_button_pressed(self):
         """
         """
+        self.parent.remove_friend(self.flist.get("anchor"))
         self.flist.delete("anchor")
-        print "How mean, such enemy."
+        if self.flist.get(0) is "":
+            self.chatbutton.config(state="disabled")
+            self.removebutton.config(state="disabled")
 
-    def __init__(self, parent, name):
+    def __init__(self, parent, name, flist):
         """
         """
         tk.Frame.__init__(self, parent)
@@ -68,8 +66,9 @@ class FriendPanel(tk.Frame):
         self.parent = parent
         self.fheader = tk.Label(self)
         self.flist = tk.Listbox(self)
+        for friend in flist:
+            self.flist.insert("end", friend[:-4])
         self.addbutton = tk.Button(self)
         self.removebutton = tk.Button(self)
-        self.friendentry = tk.Text(self)
         self.chatbutton = tk.Button(self)
         self.create_widgets()

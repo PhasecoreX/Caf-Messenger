@@ -20,8 +20,6 @@ import Tkinter as tk
 import random as rndm
 from twisted.internet import reactor
 
-import crypto
-
 HOST = ''
 PORT = 1025
 
@@ -33,7 +31,6 @@ class MainFrame(tk.Tk):
     def create_panels(self):
         """
         """
-
         self.container_frame.config(width=800, height=630)
         self.container_frame.place(x=0, y=0, anchor="nw")
 
@@ -52,9 +49,17 @@ class MainFrame(tk.Tk):
         t.grab_set()
 
     def confirm_friend(self, info):
-        crypto.add_friend(self.name, info["name"], info["key"])
+        try:
+            crypto.add_friend(self.name, info["name"], info["key"])
+        except:
+            print "RSA format not supported."
+            return 'break'
         self.friends.add_friend(info["name"])
         
+    def remove_friend(self, name):
+        if not crypto.delete_friend(self.name, name):
+            print "Something went wrong with crypto.delete_friend."
+            print "Consider reloading the client to get correct friend list."
 
     def chat(self, name):
         flag = True
@@ -136,7 +141,8 @@ class MainFrame(tk.Tk):
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = MainMenu(self)
-        self.friends = FriendPanel(self, self.name)
+        flist = crypto.get_friend_list(self.name)
+        self.friends = FriendPanel(self, self.name, flist)
 
         self.title("Cafe")
         self.maxsize(200, 630)

@@ -21,13 +21,13 @@ class AddFriend(tk.Toplevel):
         tk.Toplevel.__init__(self, parent)
         self.maxsize(500, 600)
         self.minsize(500, 600)
+        self.parent = parent
         self.myKey = myKey
         self.myKeyLabel = tk.Label(self)
         self.myKeyArea = tk.Text(self)
         self.cancelButton = tk.Button(self)
         self.fileEntry = tk.Entry(self)
         self.addButton = tk.Button(self)
-        self.clearButton = tk.Button(self)
         self.keyArea = tk.Text(self)
         self.nameEntry = tk.Entry(self)
         self.nameLabel = tk.Label(self)
@@ -36,49 +36,43 @@ class AddFriend(tk.Toplevel):
         self.createWidgets()
 
     def createWidgets(self):
-        self.cancelButton.config(text="Cancel", command=self.cancelButtonPress)
-        self.cancelButton.place()
-        
         self.addButton.config(text="Add", command=self.addButtonPress)
-        self.addButton.place()
-        
-        self.clearButton.config(text="Clear", command=self.clearButtonPress)
-        self.clearButton.place()
-        
+        self.addButton.config(width=60, height=20)
+        self.addButton.place(x=0, y=460, width=60, height=20)
+
+        self.cancelButton.config(text="Cancel", command=self.cancelButtonPress)
+        self.cancelButton.config(width=60, height=20)
+        self.cancelButton.place(x=65, y=460, width=60, height=20)
+
         self.myKeyArea.config(height=200, width=500)
         self.myKeyArea.insert("end", self.myKey)
         self.myKeyArea.place(x=0, y=20, height=200, width=500)
+
+        self.myKeyLabel.config(text="Give this key to your friend:")
+        self.myKeyLabel.config(height=20, width=200)
+        self.myKeyLabel.place(y=0, x=0, height=20, width=200)
+        
+        self.nameLabel.config(text="Enter name of friend here:")
+        self.nameLabel.config(height=20, width=200)
+        self.nameLabel.place(x=5, y=220, height=20, width=200)
+        
+        self.nameEntry.config(width=200)
+        self.nameEntry.place(x=200, y=220, width=200)
+        
+        self.keyLabel.config(text="Enter public key of friend here:")
+        self.keyLabel.config(height=20, width=200)
+        self.keyLabel.place(x=5, y=240, height=20, width=200)
         
         self.keyArea.config(height=200, width=500)
         self.keyArea.place(x=0, y=260, height=200, width=500)
         
-        self.nameEntry.config(width=50)
-        self.nameEntry.place(y=220, x=50)
-        
-        self.myKeyLabel.config(text="Give this key to your friend:")
-        self.myKeyLabel.config(height=20, width=50)
-        self.myKeyLabel.place(y=0, x=0)
-        
-        self.nameLabel.config(text="Enter name of friend here:")
-        self.nameLabel.config(height=20, width=50)
-        self.nameLabel.place(x=25, y=220, height=20, width=50)
-        
-        self.keyLabel.config(text="Enter public key of friend here:")
-        self.keyLabel.config(height=20, width=50)
-        self.keyLabel.place(x=0, y=240, height=20, width=50)
-        
     def addButtonPress(self):
         self.info["name"] = self.nameEntry.get()
-        self.info["key"] = self.keyArea.get()
-        self.parent.confirm_friend(info)
-        print "Hullo new frand!"
-        self.quit()
-        
-    def clearButtonPress(self):
-        print "ctrl+z!!"
-        self.quit()
+        self.info["key"] = self.keyArea.get(1.0, "end")
+        self.parent.confirm_friend(self.info)
+        self.destroy()
         
     def cancelButtonPress(self):
-        print "Nvm friends are lame."
+        self.destroy()
         
     
