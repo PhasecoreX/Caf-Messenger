@@ -66,7 +66,7 @@ class ChatPanel(tk.Toplevel):
         self.textarea.config(state="disabled")
         self.textentry.delete(1.0, "end")
 
-    def __init__(self, parent, name, num):
+    def __init__(self, parent, name, chatID):
         """
         """
         tk.Toplevel.__init__(self, parent)
@@ -74,7 +74,7 @@ class ChatPanel(tk.Toplevel):
         self.minsize(600, 600)
         self.title("Chat with " + name)
         self.name = name
-        self.chatID = num
+        self.chatID = chatID
         self.parent = parent
         self.textarea = tk.Text(self)
         self.sendbutton = tk.Button(self)

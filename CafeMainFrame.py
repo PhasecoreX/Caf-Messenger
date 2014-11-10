@@ -14,6 +14,8 @@
 from CafeFriendPanel import FriendPanel
 from CafeChatPanel import ChatPanel
 from CafeMainMenuBar import MainMenu
+from CafeAddFriendFrame import AddFriend
+import crypto_controller as crypto
 import Tkinter as tk
 import random as rndm
 from twisted.internet import reactor
@@ -44,6 +46,15 @@ class MainFrame(tk.Tk):
 
     def quit(self):
         reactor.stop()
+
+    def add_friend(self):
+        t = AddFriend(self, crypto.get_public_key_string(self.myKeys))
+        t.grab_set()
+
+    def confirm_friend(self, info):
+        crypto.add_friend(self.name, info["name"], info["key"])
+        self.friends.add_friend(info["name"])
+        
 
     def chat(self, name):
         flag = True
@@ -110,9 +121,11 @@ class MainFrame(tk.Tk):
         self.conn.transport.write(emsg + "\r\n")
         print "Sending:\n" + emsg + "\n"
 
-    def __init__(self, controller, conn, *args, **kwargs):
+    def __init__(self, controller, conn, myKeys, name, *args, **kwargs):
         """
         """
+        self.name = name
+        self.myKeys = myKeys
         self.conn = conn
         print "\nWelcome to CAFE Messenger! (debug mode)\n"
         tk.Tk.__init__(self, *args, **kwargs)
@@ -123,7 +136,7 @@ class MainFrame(tk.Tk):
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = MainMenu(self)
-        self.friends = FriendPanel(self)
+        self.friends = FriendPanel(self, self.name)
 
         self.title("Cafe")
         self.maxsize(200, 630)

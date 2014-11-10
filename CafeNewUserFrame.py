@@ -27,6 +27,7 @@ class NewUserWindow(tk.Toplevel):
         self.passlabel.place(x=5, y=50, anchor="nw", width=200, height=40)
         
         self.passentry.config(width=200, show="*")
+        self.passentry.bind("<KeyPress-Return>", self.enterKeyPress)
         self.passentry.place(x=210, y=50, anchor="nw", width=200, height=40)
         
         self.createButton.config(command=self.createButtonPressed)
@@ -48,6 +49,9 @@ class NewUserWindow(tk.Toplevel):
             self.nameentry.delete(0, "end")
             self.passentry.delete(0, "end")
             self.statuslabel.config(text="Username already exists.")
+
+    def enterKeyPress(self, event):
+        self.createButtonPressed()
 
     def quit(self):
         self.master.noNewUser()

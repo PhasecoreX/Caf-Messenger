@@ -22,14 +22,19 @@ HOST = ''
 PORT = 1025
 
 class RSAObject():
-    def amend(self, RSAObject):
+    def amend(self, RSAObject, name):
         self.Object = RSAObject
+        self.name = name
 
     def get(self):
         return self.Object
+    
+    def get_name(self):
+        return self.name
 
     def __init__(self):
         self.Object = None
+        self.name = None
 
 
 
@@ -117,7 +122,7 @@ if __name__ == "__main__":
     f.close()
     # TODO Error handling
     conn = reactor.connectTCP(HOST, connPort, GreeterFactory())
-    top = MainFrame(None, conn)
+    top = MainFrame(None, conn, this.get(), this.get_name())
     tksupport.install(top)
     reactor.run()
     if routerNode:

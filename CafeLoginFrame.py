@@ -22,8 +22,8 @@ class LoginFrame(tk.Tk):
         self.login.config(width=600, height=400)
         self.login.place(x=0, y=0, anchor="nw")
         
-    def success(self, KeyObject):
-        self.RSA.amend(KeyObject)
+    def success(self, KeyObject, name):
+        self.RSA.amend(KeyObject, name)
         self.destroy()
 
     def __init__(self, RSAObject, *args, **kwargs):
@@ -34,6 +34,7 @@ class LoginFrame(tk.Tk):
         self.maxsize(600, 400)
         self.minsize(600, 400)
         self.CreatePanels(self, self)
+        
 
 
 class LoginPanel(tk.Frame):
@@ -75,7 +76,9 @@ class LoginPanel(tk.Frame):
         self.newusrButton.place(x=45, y=195, anchor="nw", width=100, height=30)
 
     def LoginError(self):
-        self.errLabel.config(text="Invalid Username or Password.")
+        self.failedLoginCount += 1
+        self.errLabel.config(text="Invalid Password. (Failed "+ 
+                             str(self.failedLoginCount) +" times)")
 
     def PopulateNameMenu(self):
         nameList = crypto.get_profile_list()
@@ -84,13 +87,16 @@ class LoginPanel(tk.Frame):
     def LoginButtonPress(self):
         flag = crypto.load_profile(self.var.get(), self.passEntry.get())
         if flag is not False:
-            self.parent.success(flag)
+            self.parent.success(flag, self.var.get())
         else:
             self.passEntry.delete(0, "end")
             self.LoginError()
     
     def enterKeyPress(self, event):
-        self.LoginButtonPress()
+        if self.loginButton["state"] == "normal":
+            self.LoginButtonPress()
+        else:
+            self.passEntry.delete(0, "end")
 
     def NewUserButtonPress(self):
         self.newusrButton.config(state="disabled")
@@ -132,6 +138,7 @@ class LoginPanel(tk.Frame):
         self.deleteusrButton = tk.Button(self)
         self.updateList()
         self.CreateWidgets(self, controller)
+        self.failedLoginCount = 0
 
 
 if __name__ == "__main__":
