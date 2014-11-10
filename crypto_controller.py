@@ -216,7 +216,9 @@ def add_friend(name, friend_name, public_key):
         raise
     if success is False:
         return False
-    if load_friend(name, friend_name) is False:
+    try:
+        load_friend(name, friend_name)
+    except:
         delete_friend(name, friend_name)
         raise ValueError
     return True
@@ -278,4 +280,4 @@ def rename_friend(name, friend_old, friend_new):
 
 
 if __name__ == "__main__":
-    print rename_friend("user1", "friend1", "friend2")
+    print add_friend("test", "friend39", "friend2")
