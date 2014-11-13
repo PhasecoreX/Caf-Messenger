@@ -18,17 +18,18 @@ import os
 
 import crypto
 
-HOST = ''
+HOST = '148.61.162.206'
 PORT = 1025
 
 class RSAObject():
+
     def amend(self, RSAObject, name):
         self.Object = RSAObject
         self.name = name
 
     def get(self):
         return self.Object
-    
+
     def get_name(self):
         return self.name
 
@@ -37,12 +38,13 @@ class RSAObject():
         self.name = None
 
 
-
 class Greeter(basic.LineReceiver):
+
     """
     This class is the listener for the twisted framework. All incoming messages
     will route through here in the lineReceived function.
     """
+
     def lineReceived(self, line):
         print "Incoming:\n" + line
         key = b'01234567890123450123456789012345'
@@ -58,11 +60,13 @@ class Greeter(basic.LineReceiver):
 
 
 class GreeterFactory(ClientFactory):
+
     def buildProtocol(self, addr):
         return Greeter()
 
 
 class PubProtocol(basic.LineReceiver):
+
     def __init__(self, factory):
         self.factory = factory
 
@@ -89,19 +93,20 @@ class PubProtocol(basic.LineReceiver):
 
 
 class PubFactory(protocol.Factory):
+
     def __init__(self):
         self.clients = set()
 
     def buildProtocol(self, addr):
         return PubProtocol(self)
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     this = RSAObject()
     top = LoginFrame(this)
     top.mainloop()
     if this.get() is None:
         quit()
-   
+
     factory = GreeterFactory()
     connPort = 1025
     routerNode = False

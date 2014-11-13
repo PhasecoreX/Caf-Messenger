@@ -1,12 +1,44 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#  CafeFriendPanel.py
+#
+#  Copyright 2014 Michael Currie <CafeCurrie@gmail.com>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+#
+
+"""CafeFriendPanel.py
+
+A class for the Friend List window that appears on startup.
+"""
+
 import Tkinter as tk
 import CafeAddFriendFrame as add
 
 class FriendPanel(tk.Frame):
 
+    """
+    """
+
     def create_widgets(self):
         """
         """
-        self.fheader.config(text=str(self.name)+"'s Friendlist")
+        self.fheader.config(text=str(self.name) + "'s Friendlist")
         self.fheader.config(width=185, height=20)
         self.fheader.place(x=0, y=0, anchor="nw", width=185, height=20)
 
@@ -36,7 +68,7 @@ class FriendPanel(tk.Frame):
         """
         """
         self.parent.add_friend()
-        
+
     def add_friend(self, name):
         """
         """
@@ -59,7 +91,16 @@ class FriendPanel(tk.Frame):
             self.removebutton.config(state="disabled")
 
     def __init__(self, parent, name, flist):
-        """
+        """Initialization function.
+        
+        Initializes all of the widgets and objects, then calls the 
+        create_widgets function to configure and place them.
+        
+        Args:  
+            parent: The parent window that created this Toplevel.
+            name: The name associated with the current user.
+            flist: A list of friends.
+        
         """
         tk.Frame.__init__(self, parent)
         self.name = name

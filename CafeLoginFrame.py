@@ -15,18 +15,28 @@ import Tkinter as tk
 import crypto_controller as crypto
 from CafeNewUserFrame import NewUserWindow
 
+
 class LoginFrame(tk.Tk):
 
+    """
+    """
+
     def CreatePanels(self, parent, controller):
+        """
+        """
         self.login = LoginPanel(self, self)
         self.login.config(width=600, height=400)
         self.login.place(x=0, y=0, anchor="nw")
-        
+
     def success(self, KeyObject, name):
+        """
+        """
         self.RSA.amend(KeyObject, name)
         self.destroy()
 
     def __init__(self, RSAObject, *args, **kwargs):
+        """
+        """
         tk.Tk.__init__(self, *args, **kwargs)
         self.RSA = RSAObject
         self.login = LoginPanel(self, self)
@@ -34,21 +44,26 @@ class LoginFrame(tk.Tk):
         self.maxsize(600, 400)
         self.minsize(600, 400)
         self.CreatePanels(self, self)
-        
 
 
 class LoginPanel(tk.Frame):
 
+    """
+    """
+
     def CreateWidgets(self, parent, controller):
+        """
+        """
         message = "Please select your username and enter your password.\n"
         message = message + "If you are a new user, please click 'New User'"
-        
+
         self.mainLabel.config(text=message)
         self.mainLabel.place(x=15, y=15, anchor="nw", width=350, height=30)
-        
+
         self.deleteusrButton.config(text="Delete", width=100, height=30)
         self.deleteusrButton.config(command=self.deleteButtonPress)
-        self.deleteusrButton.place(x=330, y=60, anchor="nw", width=100, height=30)
+        self.deleteusrButton.place(
+            x=330, y=60, anchor="nw", width=100, height=30)
 
         self.passEntry.config(width=205, show="*")
         self.passEntry.place(x=120, y=105, anchor="nw", width=205, height=30)
@@ -69,44 +84,58 @@ class LoginPanel(tk.Frame):
             self.loginButton.config(state="disabled")
         self.loginButton.config(width=100, height=30, text="Login")
         self.loginButton.config(command=self.LoginButtonPress)
-        
+
         self.loginButton.place(x=200, y=195, anchor="nw", width=100, height=30)
         self.newusrButton.config(width=100, height=30, text="New User")
         self.newusrButton.config(command=self.NewUserButtonPress)
         self.newusrButton.place(x=45, y=195, anchor="nw", width=100, height=30)
 
     def LoginError(self):
+        """
+        """
         self.failedLoginCount += 1
-        self.errLabel.config(text="Invalid Password. (Failed "+ 
-                             str(self.failedLoginCount) +" times)")
+        self.errLabel.config(text="Invalid Password. (Failed " +
+                             str(self.failedLoginCount) + " times)")
 
     def PopulateNameMenu(self):
+        """
+        """
         nameList = crypto.get_profile_list()
         return nameList
 
     def LoginButtonPress(self):
+        """
+        """
         flag = crypto.load_profile(self.var.get(), self.passEntry.get())
         if flag is not False:
             self.parent.success(flag, self.var.get())
         else:
             self.passEntry.delete(0, "end")
             self.LoginError()
-    
+
     def enterKeyPress(self, event):
+        """
+        """
         if self.loginButton["state"] == "normal":
             self.LoginButtonPress()
         else:
             self.passEntry.delete(0, "end")
 
     def NewUserButtonPress(self):
+        """
+        """
         self.newusrButton.config(state="disabled")
         t = NewUserWindow(self)
-        
+
     def deleteButtonPress(self):
+        """
+        """
         crypto.delete_profile(self.var.get())
         self.updateList()
-        
+
     def updateList(self):
+        """
+        """
         self.newusrButton.config(state="normal")
         self.names = self.PopulateNameMenu()
         self.var = tk.StringVar(self)
@@ -123,9 +152,13 @@ class LoginPanel(tk.Frame):
             self.loginButton.config(state="disabled")
 
     def noNewUser(self):
+        """
+        """
         self.newusrButton.config(state="normal")
-    
+
     def __init__(self, parent, controller):
+        """
+        """
         tk.Frame.__init__(self, parent)
         self.parent = parent
         self.mainLabel = tk.Label(self)
@@ -139,8 +172,3 @@ class LoginPanel(tk.Frame):
         self.updateList()
         self.CreateWidgets(self, controller)
         self.failedLoginCount = 0
-
-
-if __name__ == "__main__":
-    top = LoginFrame()
-    top.mainloop()

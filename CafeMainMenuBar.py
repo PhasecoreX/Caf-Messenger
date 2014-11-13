@@ -2,16 +2,23 @@
 #   CIS 467 Capstone Project - Cafe Messenger
 #   CafeNewUserFrame.py
 #   Author: Michael Currie
-#   
+#
 #   This program is the main menu bar for the chat window interface. This was
 #   created to fix the monolithic code issue with ChatMainFrame.
-#   
+#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import Tkinter as tk
 
+
 class MainMenu(tk.Menu):
+
+    """
+    """
+
     def create_widgets(self):
+        """
+        """
         # Add a cascade list called filemenu
         self.filemenu.add_command(label="Quit", command=self.parent.quit)
 
@@ -27,8 +34,10 @@ class MainMenu(tk.Menu):
         self.add_cascade(label="File", menu=self.filemenu)
         self.add_cascade(label="View", menu=self.viewmenu)
         self.add_cascade(label="Help", menu=self.helpmenu)
-        
+
     def __init__(self, parent):
+        """
+        """
         tk.Menu.__init__(self, parent)
         self.parent = parent
         self.filemenu = tk.Menu(self, tearoff=0)

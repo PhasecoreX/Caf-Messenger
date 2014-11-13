@@ -16,6 +16,7 @@ from CafeChatPanel import ChatPanel
 from CafeMainMenuBar import MainMenu
 from CafeAddFriendFrame import AddFriend
 import crypto_controller as crypto
+import crypto as old_crypto
 import Tkinter as tk
 import random as rndm
 from twisted.internet import reactor
@@ -25,6 +26,7 @@ PORT = 1025
 
 
 class MainFrame(tk.Tk):
+
     """
     """
 
@@ -42,26 +44,38 @@ class MainFrame(tk.Tk):
         self.friends.place(x=5, y=5, anchor="nw")
 
     def quit(self):
+        """
+        """
         reactor.stop()
 
     def add_friend(self):
+        """
+        """
         t = AddFriend(self, crypto.get_public_key_string(self.myKeys))
         t.grab_set()
 
     def confirm_friend(self, info):
+        """
+        """
         try:
-            crypto.add_friend(self.name, info["name"], info["key"])
+            if crypto.add_friend(self.name, info["name"], info["key"]):
+                self.friends.add_friend(info["name"])
+                return 0
+            else:
+                return 1
         except:
-            print "RSA format not supported."
-            return 'break'
-        self.friends.add_friend(info["name"])
-        
+            return -1
+
     def remove_friend(self, name):
+        """
+        """
         if not crypto.delete_friend(self.name, name):
             print "Something went wrong with crypto.delete_friend."
             print "Consider reloading the client to get correct friend list."
 
     def chat(self, name):
+        """
+        """
         flag = True
         number = -1
         while flag:
@@ -69,7 +83,7 @@ class MainFrame(tk.Tk):
             try:
                 self.winlist[number]
             except KeyError:
-                t = ChatPanel(self, name, number)
+                t = ChatPanel(self, self.name, name, number)
                 self.winlist[number] = t
                 print number
                 flag = False
@@ -94,7 +108,7 @@ class MainFrame(tk.Tk):
 
         """
         try:
-            self.winlist[0].text_area_append(message)
+            self.winlist[0].text_area_append(name, message)
         except IndexError:
             print "Another friend is trying to reach the client."
         except:
@@ -122,7 +136,7 @@ class MainFrame(tk.Tk):
 
         # Chop off the \n
         print "Encrypting:\n" + message[:-1]
-        emsg = crypto.encrypt_message(self.key, message[:-1])
+        emsg = old_crypto.encrypt_message(self.key, message[:-1])
         self.conn.transport.write(emsg + "\r\n")
         print "Sending:\n" + emsg + "\n"
 

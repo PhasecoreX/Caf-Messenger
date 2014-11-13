@@ -1,10 +1,47 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#  CafeChatPanel.py
+#
+#  Copyright 2014 Michael Currie <CafeCurrie@gmail.com>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+#
+
+"""CafeChatPanel.py
+
+A class for the chat window that pops up when the chat button is pressed.
+"""
+
+from CafeReadOnlyText import ReadOnlyText
 import Tkinter as tk
 
 class ChatPanel(tk.Toplevel):
+
     """
+    
     """
-    def create_widgets(self, parent):
-        """
+
+    def create_widgets(self):
+        """A function that gets called on creation of the class.
+        
+        This function configures and places all widgets into their respective
+        spots, and applies the commands to the various buttons and keys.
+        
         """
 
         self.textarea.config(width=570, height=495, state="disabled")
@@ -24,25 +61,50 @@ class ChatPanel(tk.Toplevel):
         self.textentry.bind("<Shift-Return>", self.shift_enter_pressed)
 
     def shift_enter_pressed(self, event):
-        """
+        """A function that gets called when shift+enter is pressed.
+        
+        This function will insert a newline into the message box. This was
+        needed for users to insert newlines after the enter key was binded to
+        the send button.
+        
+        Args:
+            event:  The event that associates with a specific key.
+            
+        Returns:
+            A break sequence.
+        
         """
         self.textentry.insert("end", "\n")
         return 'break'
 
-    def text_area_append(self, message):
-        """
+    def text_area_append(self, name, message):
+        """A function that appends the given message to the chat area.
+        
+        This will unlock the chat area, append the name and message, then lock
+        the chat area again. This is used by the parent when a message from
+        another user is received.
+        
+        Args:
+            name:   The name of the other client.
+            parent: The message of the other client.
+        
         """
         self.textarea.config(state="normal")
-        self.textarea.insert("end", self.name + ": " + message + "\n")
+        self.textarea.insert("end", name + ": " + message + "\n")
         self.textarea.config(state="disabled")
 
-    def enter_key_released(self, event):
-        """
-        """
-        self.textentry.delete(1.0, "end")
-
     def enter_key_pressed(self, event):
-        """
+        """A function that gets called whenever the enter key is pressed.
+        
+        This will check to see if there is any tangible text in the message
+        box, then if there is it simulates a send button press.
+        
+        Args:
+            event:  The event that associates with a specific key.
+            
+        Returns:
+            A break sequence.
+        
         """
         t = self.textentry.get(1.0, "end")
         if t == "\n":
@@ -60,23 +122,34 @@ class ChatPanel(tk.Toplevel):
         message = self.textentry.get(1.0, "end")
         self.parent.send(message, self.chatID)
         self.textarea.config(state="normal")
-        self.textarea.insert("end", "Client: ")
+        self.textarea.insert("end", self.name + ": ")
         self.textarea.insert("end", self.textentry.get(1.0, "end"))
         self.textarea.see("end")
         self.textarea.config(state="disabled")
         self.textentry.delete(1.0, "end")
 
-    def __init__(self, parent, name, chatID):
-        """
+    def __init__(self, parent, name, friend_name, chatID):
+        """Initialization function.
+        
+        Initializes all of the widgets and objects, then calls the 
+        create_widgets function to configure and place them.
+        
+        Args:  
+            parent:         The parent window that created this Toplevel.
+            name:           The name associated with the current user.
+            friend_name:    The name associated with the friend.
+            chatID:         The number associated with the current window.
+        
         """
         tk.Toplevel.__init__(self, parent)
         self.maxsize(600, 600)
         self.minsize(600, 600)
-        self.title("Chat with " + name)
+        self.title("Chat with " + friend_name)
         self.name = name
+        self.friend_name = friend_name
         self.chatID = chatID
         self.parent = parent
-        self.textarea = tk.Text(self)
+        self.textarea = ReadOnlyText(self)
         self.sendbutton = tk.Button(self)
         self.textentry = tk.Text(self)
-        self.create_widgets(parent)
+        self.create_widgets()
