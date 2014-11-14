@@ -52,8 +52,7 @@ def get_public_key_string(private_key):
     return crypto.get_public_key_string(private_key)
 
 
-def gen_packet(packet_type, source, dest, convo_id, data,
-               encrypt_key, sign_key):
+def gen_packet(packet_type, source, dest, convo_id, data, encrypt_key, sign_key):
     """Creates an encrypted packet with data for sending
 
     Args:
@@ -74,18 +73,18 @@ def gen_packet(packet_type, source, dest, convo_id, data,
     Returns:
         Packet object ready for sending
     """
-    if packet_type.equals("M"):
+    if packet_type == "M":
         return packet_gen.gen_message_packet(source, dest, convo_id, data,
                                              encrypt_key, sign_key)
-    if packet_type.equals("C"):
+    if packet_type == "C":
         return packet_gen.gen_command_packet(source, dest, convo_id, data,
                                              encrypt_key, sign_key)
-    if packet_type.equals("A"):
+    if packet_type == "A":
         return packet_gen.gen_auth_packet(source, dest, convo_id, data,
                                           encrypt_key, sign_key)
 
 
-def decrypt_packet(packet_type, packet, encrypt_key, sender_key):
+def decrypt_packet(packet, encrypt_key, sender_key = None):
     """Decrypts a packet
 
     Args:
@@ -100,10 +99,32 @@ def decrypt_packet(packet_type, packet, encrypt_key, sender_key):
     Returns:
         Decrypted_Packet object ready for parsing
     """
-    if packet_type.equals("A"):
-        return packet_gen.decrypt_packet_a(packet, encrypt_key, sender_key)
-    if packet_type.equals("M") or packet_type.equals("C"):
+    p_type = packet.packet_gen.get_packet_type()
+    if p_type == "A":
+        return packet_gen.decrypt_packet_a(packet, encrypt_key)
+    if p_type == "M" or p_type == "C":
         return packet_gen.decrypt_packet_s(packet, encrypt_key, sender_key)
+
+
+def verify_packet(packet, sender_key):
+    """Checks signature on packet
+
+    Used oftentimes for checking Authentication packets, once we figure out
+    who it's from
+
+    Args:
+        packet:      Packet to be decrypted
+        sender_key:  Public key of sender for checking signature
+
+    Returns:
+        True if authentic, false otherwise
+    """
+    to_verify = (packet.get_packet_type() +
+                 pickle.dumps(packet.get_source()) +
+                 packet.get_destination() +
+                 packet.get_convo_id() +
+                 pickle.dumps(packet.get_data()))
+    return verify(sender_key, to_verify, packet.get_signature())
 
 
 def get_profile_list():

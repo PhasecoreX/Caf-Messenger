@@ -120,3 +120,17 @@ class DecryptedPacket(object):
     def get_data(self):
         """Gets data from decrypted packet"""
         return self.data
+
+
+class DecryptedPacketA(DecryptedPacket):
+    def __init__(self,
+                 packet_type,
+                 source,
+                 convo_id,
+                 data,
+                 pub_key):
+        DecryptedPacket.__init__(self, packet_type, source, convo_id, data)
+        self.sender_key = sender_key
+        
+    def get_sender_key():
+        return self.pub_key

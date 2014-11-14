@@ -27,7 +27,7 @@
 A class for the chat window that pops up when the chat button is pressed.
 """
 
-from CafeReadOnlyText import ReadOnlyText
+from CafeReadOnlyText import ReadOnlyText 
 import Tkinter as tk
 
 class ChatPanel(tk.Toplevel):
@@ -120,7 +120,7 @@ class ChatPanel(tk.Toplevel):
 
         """
         message = self.textentry.get(1.0, "end")
-        self.parent.send(message, self.chatID)
+        self.parent.send(message, self.convo_id, self.s_key)
         self.textarea.config(state="normal")
         self.textarea.insert("end", self.name + ": ")
         self.textarea.insert("end", self.textentry.get(1.0, "end"))
@@ -128,7 +128,26 @@ class ChatPanel(tk.Toplevel):
         self.textarea.config(state="disabled")
         self.textentry.delete(1.0, "end")
 
-    def __init__(self, parent, name, friend_name, chatID):
+    def get_sym_key(self):
+        """This method is called by the parent to get the symmetric key.
+        
+        This will return the symmetric key associated with this chat instance.
+        
+        """
+        return self.s_key
+
+    def get_name(self):
+        """
+        """
+        return self.friend_name
+    
+    def set_friend_convo_id(self, convo_id):
+        self.friend_convo_id = convo_id
+    
+    def get_friend_convo_id(self):
+        return self.friend_convo_id
+
+    def __init__(self, parent, name, friend_name, convo_id, friend_convo_id, s_key):
         """Initialization function.
         
         Initializes all of the widgets and objects, then calls the 
@@ -138,7 +157,7 @@ class ChatPanel(tk.Toplevel):
             parent:         The parent window that created this Toplevel.
             name:           The name associated with the current user.
             friend_name:    The name associated with the friend.
-            chatID:         The number associated with the current window.
+            convo_id:         The number associated with the current window.
         
         """
         tk.Toplevel.__init__(self, parent)
@@ -146,8 +165,10 @@ class ChatPanel(tk.Toplevel):
         self.minsize(600, 600)
         self.title("Chat with " + friend_name)
         self.name = name
+        self.friend_convo_id = friend_convo_id
+        self.s_key = s_key
         self.friend_name = friend_name
-        self.chatID = chatID
+        self.convo_id = convo_id
         self.parent = parent
         self.textarea = ReadOnlyText(self)
         self.sendbutton = tk.Button(self)
