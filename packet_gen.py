@@ -28,7 +28,7 @@ Makes encryption and packet generation even easier!
 
 from crypto import encrypt_message, sign, encrypt_auth, verify,\
     decrypt_message, decrypt_auth, get_public_key_string
-from packet import Packet, DecryptedPacket
+from packet import PacketS, PacketA, DecryptedPacketS, DecryptedPacketA
 import cPickle as pickle
 
 
@@ -36,46 +36,46 @@ def gen_message_packet(source, dest, convo_id, message, encrypt_key, sign_key):
     """Creates a packet with data for message sending
 
     Args:
-        source:      Source user ID
-        dest:        Destination user ID
-        convo_id:    Destination user conversation ID
-        message:     Message to send
-        encrypt_key: Key used for symmetric encryption
-        sign_key:    Private key for signing each packet
+        source:      Where the packet came from (you)
+        destination: 8 Hex character destination (them)
+        convo_id:    Conversation ID (the one they want you to use)
+        message:     Raw string message
+        encrypt_key: Conversations symmetric encrtyption key
+        sign_key:    Your private key for signing
 
     Returns:
-        Packet object ready for sending
+        PacketS object ready for sending
     """
     e_source = encrypt_message(encrypt_key, source)
     e_message = encrypt_message(encrypt_key, message)
     signature = sign(sign_key,
                      "M" + pickle.dumps(e_source) +
-                     dest + convo_id +
+                     dest + str(convo_id) +
                      pickle.dumps(e_message))
-    return Packet("M", e_source, dest, convo_id, e_message, signature)
+    return PacketS("M", e_source, dest, convo_id, e_message, signature)
 
 
 def gen_command_packet(source, dest, convo_id, command, encrypt_key, sign_key):
     """Creates a packet with data for command sending
 
     Args:
-        source:      Source user ID
-        dest:        Destination user ID
-        convo_id:    Destination user conversation ID
-        command:     Command to send
-        encrypt_key: Key used for symmetric encryption
-        sign_key:    Private key for signing each packet
+        source:      Where the packet came from (you)
+        destination: 8 Hex character destination (them)
+        convo_id:    Conversation ID (the one they want you to use)
+        command:     Raw string command
+        encrypt_key: Conversations symmetric encrtyption key
+        sign_key:    Your private key for signing
 
     Returns:
-        Packet object ready for sending
+        PacketS object ready for sending
     """
     e_source = encrypt_message(encrypt_key, source)
     e_command = encrypt_message(encrypt_key, command)
     signature = sign(sign_key,
-                     "M" + pickle.dumps(e_source) +
-                     dest + convo_id +
+                     "C" + pickle.dumps(e_source) +
+                     dest + str(convo_id) +
                      pickle.dumps(e_command))
-    return Packet("C", e_source, dest, convo_id, e_command, signature)
+    return PacketS("C", e_source, dest, convo_id, e_command, signature)
 
 
 def gen_auth_packet(source, dest, convo_id, proposed_key,
@@ -83,23 +83,29 @@ def gen_auth_packet(source, dest, convo_id, proposed_key,
     """Creates a packet with data for initializing a communication line
 
     Args:
-        source:       Source user ID
-        dest:         Destination user ID
-        convo_id:     Destination user conversation ID
-        proposed_key: Proposed key to use in all future M and C-Packets
-        encrypt_key:  Public key of recipient
-        sign_key:     Private key for signing each packet
+        source:       Where the packet came from (you)
+        destination:  8 Hex character destination (them)
+        convo_id:     Conversation ID (the one they want you to use)
+        proposed_key: Proposed encryption key to use
+        encrypt_key:  Conversations symmetric encryption key
+        sign_key:     Your private key for signing
 
     Returns:
-        Packet object ready for sending
+        PacketA object ready for sending
     """
-    e_source = encrypt_auth(encrypt_key, source)
-    e_proposed_data = encrypt_auth(encrypt_key, str(convo_id) + "\"" + get_public_key_string(sign_key) + "\"" + proposed_key)
+    e_proposed_key = encrypt_auth(encrypt_key, proposed_key)
+    e_source = encrypt_message(proposed_key, source)
+    e_convo_id = encrypt_message(proposed_key, str(convo_id))
+    e_sender_key = encrypt_message(proposed_key,
+                                   get_public_key_string(sign_key))
     signature = sign(sign_key,
-                     "M" + pickle.dumps(e_source) +
+                     "A" + pickle.dumps(e_source) +
                      dest +
-                     pickle.dumps(e_proposed_data))
-    return Packet("A", e_source, dest, None, e_proposed_data, signature)
+                     pickle.dumps(e_convo_id) +
+                     pickle.dumps(e_proposed_key) +
+                     pickle.dumps(e_sender_key))
+    return PacketA(e_source, dest, e_convo_id, e_proposed_key, e_sender_key,
+                   signature)
 
 
 def decrypt_packet_s(packet, encrypt_key, sender_key):
@@ -111,20 +117,20 @@ def decrypt_packet_s(packet, encrypt_key, sender_key):
         sender_key:  Public key of sender for checking signature
 
     Returns:
-        Decrypted_Packet object ready for parsing
+        DecryptedPacketS object ready for parsing
     """
     to_verify = (packet.get_packet_type() +
                  pickle.dumps(packet.get_source()) +
                  packet.get_destination() +
-                 packet.get_convo_id() +
+                 str(packet.get_convo_id()) +
                  pickle.dumps(packet.get_data()))
     if verify(sender_key, to_verify, packet.get_signature()):
         d_source = decrypt_message(encrypt_key, packet.get_source())
         d_data = decrypt_message(encrypt_key, packet.get_data())
-        return DecryptedPacket(packet.get_packet_type(),
-                               d_source,
-                               int(packet.get_convo_id()),
-                               d_data)
+        return DecryptedPacketS(packet.get_packet_type(),
+                                d_source,
+                                int(packet.get_convo_id()),
+                                d_data)
     return False
 
 
@@ -136,24 +142,24 @@ def decrypt_packet_a(packet, private_key):
         private_key: Private key for decrypting
 
     Returns:
-        Decrypted_Packet object ready for parsing
+        DecryptedPacketA object ready for parsing
     """
     """
     to_verify = (packet.get_packet_type() +
                  pickle.dumps(packet.get_source()) +
                  packet.get_destination() +
-                 packet.get_convo_id() +
+                 str(packet.get_convo_id()) +
                  pickle.dumps(packet.get_data()))
     """
-    d_source = decrypt_auth(private_key, packet.get_source())
-    d_data = decrypt_auth(private_key, packet.get_data())
-    convo_id = d_data.split("\"")[0]
-    sender_key = d_data.split("\"")[1]
-    proposed_key = d_data[len(convo_id)+len(sender_key)+2:]
+    # For auth packets, the proposed symmetric key used for encrypting the
+    # rest of the packet.
+    proposed_key = decrypt_auth(private_key, packet.get_proposed_key())
+    d_source = decrypt_message(proposed_key, packet.get_source())
+    d_convo_id = decrypt_message(proposed_key, packet.get_convo_id())
+    d_sender_key = decrypt_message(proposed_key, packet.get_sender_key())
     # if verify(sender_key, to_verify, packet.get_signature()):
-    return DecryptedPacketA(packet.get_packet_type(),
-                            d_source,
-                            int(convo_id),
+    return DecryptedPacketA(d_source,
+                            int(d_convo_id),
                             proposed_key,
-                            sender_key)
-    return False
+                            d_sender_key)
+    # return False

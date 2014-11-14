@@ -10,16 +10,15 @@
 #
 #
 #
-
-from CafeFriendPanel import FriendPanel
-from CafeChatPanel import ChatPanel
-from CafeMainMenuBar import MainMenu
-from CafeAddFriendFrame import AddFriend
-import crypto_controller as crypto
-import cPickle as pickle
-import Tkinter as tk
-import random as rndm
 from twisted.internet import reactor
+from CafeAddFriendFrame import AddFriend
+from CafeChatPanel import ChatPanel
+from CafeFriendPanel import FriendPanel
+from CafeMainMenuBar import MainMenu
+import Tkinter as tk
+import cPickle as pickle
+import crypto_controller as crypto
+
 
 HOST = ''
 PORT = 1025
@@ -73,7 +72,6 @@ class MainFrame(tk.Tk):
             print "Something went wrong with crypto.delete_friend."
             print "Consider reloading the client to get correct friend list."
 
-
     def handle_packet(self, packet):
         """
         """
@@ -86,24 +84,24 @@ class MainFrame(tk.Tk):
             sym_key = t.get_sym_key()
             friend = t.get_name()
             friend_RSA = crypto.load_friend(self.name, friend)
-            decrypted_packet_m = crypto.decrypt_packet(packet, sym_key, 
-                                                       friend_RSA)
+            decrypted_packet_m = crypto.decrypt_packet_s(packet, sym_key,
+                                                         friend_RSA)
             if decrypted_packet_m is not False:
-                message = decrypted_packet_c.get_data()
+                message = decrypted_packet_m.get_data()
                 self.append_message(friend, message, c_id)
                 print "Message appended!"
             else:
                 print "Signature does not match key, tossing packet!"
                 return 'break'
-            
+
         if p_type == "C":
             print "C Type Packet received."
             t = self.winlist[c_id]
             sym_key = t.get_sym_key()
             friend = t.get_name()
             friend_RSA = crypto.load_friend(self.name, friend)
-            decrypted_packet_c = crypto.decrypt_packet(packet, sym_key, 
-                                                       friend_RSA)
+            decrypted_packet_c = crypto.decrypt_packet_s(packet, sym_key,
+                                                         friend_RSA)
             if decrypted_packet_c is not False:
                 command = decrypted_packet_c.get_data().split(" ")
                 if command[0] == "accept":
@@ -113,65 +111,62 @@ class MainFrame(tk.Tk):
 
                 print "Unknown command type. Packet thrown."
                 return 'break'
-            
+
             else:
                 print "Signature does not match key, tossing packet!"
                 return 'break'
-              
+
         if p_type == "A":
             print "A Type Packet received."
             d_packet_a = crypto.decrypt_packet_a(packet, self.myKeys)
             public_key = d_packet_a.get_sender_key()
             for i in self.flist:
-                #Load a friend from our friends list.
+                # Load a friend from our friends list.
                 friend_RSA = crypto.load_friend(self.name, i)
-                #Does this packet come from a user in our friends list?
-                if public_key == get_public_key_string(friend_RSA):
-                    #Verify the integrity of the packet using its signature.
+                # Does this packet come from a user in our friends list?
+                if public_key == crypto.get_public_key_string(friend_RSA):
+                    # Verify the integrity of the packet using its signature.
                     if crypto.verify_packet(packet, friend_RSA):
                         number = self.recv_chat(i,
                                                 d_packet_a.get_convo_id(),
                                                 d_packet_a.get_data())
-                        packet = crypto.gen_packet("C", "Source", "Destination",
-                                                   d_packet_a.get_convo_id(),
-                                                   "accept " + number,
-                                                   d_packet_a.get_data(),
-                                                   self.myKeys)
+                        packet = crypto.gen_packet_s("C", "Source", "Destination",
+                                                     d_packet_a.get_convo_id(),
+                                                     "accept " + number,
+                                                     d_packet_a.get_data(),
+                                                     self.myKeys)
                         packet_pickle = pickle.dump(packet)
                         self.write_to_transport(packet_pickle)
                         print "Sending C packet!"
                         return 'break'
-                    #The packet was corrupted or signed by a stranger.
+                    # The packet was corrupted or signed by a stranger.
                     else:
                         print "Signature does not match key, tossing packet!"
                         return 'break'
-                    
+
             print "Not a friend! (tossed)"
             return 'break'
-
 
     def send_chat(self, name):
         print "Chat Start!"
         sym_key = crypto.generate_symmetric_key()
         convo_id = self.generate_convo_id()
         t = ChatPanel(self, self.name, name, convo_id,
-                              None, sym_key)
+                      None, sym_key)
         self.winlist[convo_id] = t
         friend_RSA = crypto.load_friend(self.name, name)
-        packet = crypto.gen_packet("A", "Source", "Destination", convo_id, sym_key, 
-                          friend_RSA, self.myKeys)
+        packet = crypto.gen_packet_a("Source", "Destination", convo_id,
+                                     sym_key, friend_RSA, self.myKeys)
         packet_pickle = pickle.dump(packet)
         self.write_to_transport(packet_pickle)
         print "Sending A packet!"
-        
-        
-        
+
     def recv_chat(self, name, their_number, proposed_key):
         print "Chat received!"
         convo_id = self.generate_convo_id()
         t = ChatPanel(self, self.name, name, convo_id,
-                              their_number, proposed_key)
-        self.winlist[number] = t
+                      their_number, proposed_key)
+        self.winlist[convo_id] = t
         return convo_id
 
     def generate_convo_id(self):
@@ -184,7 +179,7 @@ class MainFrame(tk.Tk):
                 self.winlist[number]
             except KeyError:
                 return number
-        
+
         print "Number Exceeded, abort."
         return -1
         """
@@ -233,9 +228,9 @@ class MainFrame(tk.Tk):
         message: The message that will be sent to the controller.
 
         """
-        
-        packet = gen_packet("M", "Source", "Destination", convo_id, 
-                            message, sym_key, self.myKeys)
+
+        packet = crypto.gen_packet_s("M", "Source", "Destination", convo_id,
+                                     message, sym_key, self.myKeys)
         packet_pickle = pickle.dump(packet)
         self.write_to_transport(packet_pickle)
         print "Sending M packet!"

@@ -7,22 +7,20 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from CafeMainFrame import MainFrame
-from CafeLoginFrame import LoginFrame
-
-from twisted.internet.protocol import ClientFactory
 from twisted.internet import tksupport, reactor, protocol, endpoints
+from twisted.internet.protocol import ClientFactory
 from twisted.protocols import basic
-
+import os
 import socket
 import time
-import os
-import cPickle as pickle
-import crypto_controller as crypto
 
+from CafeLoginFrame import LoginFrame
+from CafeMainFrame import MainFrame
+import cPickle as pickle
 HOST1 = '148.61.112.118'
 HOST2 = '148.61.112.117'
 PORT = 1025
+
 
 class RSAObject():
 
@@ -51,10 +49,7 @@ class Greeter(basic.LineReceiver):
     def lineReceived(self, this_pickle):
         packet = pickle.load(this_pickle)
         top.handle_packet(packet)
-        
-        
-        
-        
+
         """
         print "Incoming:\n" + line
         key = b'01234567890123450123456789012345'
@@ -74,7 +69,7 @@ class GreeterFactory(ClientFactory):
 
     def buildProtocol(self, addr):
         return Greeter()
-    
+
     def clientConnectionLost(self, connector, reason):
         print reason
         print "Connection lost, attempting reconnection . . ."
@@ -86,6 +81,7 @@ class GreeterFactory(ClientFactory):
         print "Failed to connect, attempting reconnection . . ."
         time.sleep(3)
         connector.connect()
+
 
 class PubProtocol(basic.LineReceiver):
 
@@ -106,6 +102,7 @@ class PubProtocol(basic.LineReceiver):
         for c in self.factory.clients:
             c.transport.write(line)
 
+
 class PubFactory(protocol.Factory):
 
     def __init__(self):
@@ -121,7 +118,7 @@ if __name__ == "__main__":
     if host == HOST1:
         friend = HOST2
         print "Welcome! This program will attempt to connect to " + friend
-    else: 
+    else:
         if host == HOST2:
             friend = HOST1
             print "Welcome! This program will attempt to connect to " + friend
@@ -156,7 +153,7 @@ if __name__ == "__main__":
     f.close()
     # TODO Error handling
     """
-    
+
     reactor.listenTCP(PORT, GreeterFactory())
     conn = reactor.connectTCP(friend, PORT, GreeterFactory())
     top = MainFrame(None, conn, this.get(), this.get_name())

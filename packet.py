@@ -21,21 +21,20 @@
 #  MA 02110-1301, USA.
 #
 #
-
 """packet.py
 
-Definitions for packet format. To be sent over the network.
+Definitions for packet formats to be sent over the network.
 """
 
 
-class Packet(object):
+class PacketS(object):
 
-    """Defines master packet format
+    """Defines master packet format for symmetric packets (encrypted)
 
     This will be the object that will be sent over the network
 
     Args:
-        packet_type: Type of packet (A, S, or M currently)
+        packet_type: Type of packet (S, or M currently)
         source:      (Encrypted) Where the packet came from
         destination: 8 Hex character destination
         convo_id:    Conversation ID (to know what convo this packet goes to)
@@ -43,12 +42,7 @@ class Packet(object):
         signature:   Signature over all above fields
     """
 
-    def __init__(self,
-                 packet_type,
-                 source,
-                 destination,
-                 convo_id,
-                 data,
+    def __init__(self, packet_type, source, destination, convo_id, data,
                  signature):
         self.packet_type = packet_type
         self.source = source
@@ -82,24 +76,51 @@ class Packet(object):
         return self.signature
 
 
-class DecryptedPacket(object):
+class PacketA(PacketS):
 
-    """Defines master packet format (decrypted)
+    """Defines master packet format for authentication packets (encrypted)
+
+    This will be the object that will be sent over the network
+
+    Args:
+        source:       (Encrypted) Where the packet came from
+        destination:  8 Hex character destination
+        convo_id:     Conversation ID that sender wants you to use for replies
+        proposed_key: Proposed symmetric key
+        sender_key:   String version of senders public key
+        signature:    Signature over all above fields
+    """
+
+    def __init__(self, source, destination, convo_id, proposed_key, sender_key,
+                 signature):
+        PacketS.__init__(self, "A", source, destination, convo_id,
+                         proposed_key, signature)
+        self.sender_key = sender_key
+
+    def get_proposed_key(self):
+        """Gets proposed key from decrypted packet"""
+        return self.data
+
+    def get_sender_key(self):
+        """Gets senders public key string from decrypted packet"""
+        return self.sender_key
+
+
+class DecryptedPacketS(object):
+
+    """Defines master packet format for symmetric packets (decrypted)
 
     This will be the object that will contain all decrypted information
 
     Args:
-        packet_type: Type of packet (A, S, or M currently)
+        packet_type: Type of packet (S, or M currently)
         source:      Where the packet came from
-        convo_id:    Conversation ID (to know what convo this packet goes to)
-        data:        Data
+        convo_id:    Conversation ID (to know what window this packet goes to)
+        data:        - (M) Message
+                     - (C) Command
     """
 
-    def __init__(self,
-                 packet_type,
-                 source,
-                 convo_id,
-                 data):
+    def __init__(self, packet_type, source, convo_id, data):
         self.packet_type = packet_type
         self.source = source
         self.convo_id = convo_id
@@ -122,15 +143,27 @@ class DecryptedPacket(object):
         return self.data
 
 
-class DecryptedPacketA(DecryptedPacket):
-    def __init__(self,
-                 packet_type,
-                 source,
-                 convo_id,
-                 data,
-                 pub_key):
-        DecryptedPacket.__init__(self, packet_type, source, convo_id, data)
+class DecryptedPacketA(DecryptedPacketS):
+
+    """Defines master packet format for authentication packets (decrypted)
+
+    This will be the object that will contain all decrypted information
+
+    Args:
+        source:       Where the packet came from
+        convo_id:     Conversation ID other user wants you to use when replying
+        proposed_key: Proposed symmetric key
+        sender_key:   String of senders public key
+    """
+
+    def __init__(self, source, convo_id, proposed_key, sender_key):
+        DecryptedPacketS.__init__(self, "A", source, convo_id, proposed_key)
         self.sender_key = sender_key
-        
-    def get_sender_key():
-        return self.pub_key
+
+    def get_proposed_key(self):
+        """Gets proposed key from decrypted packet"""
+        return self.data
+
+    def get_sender_key(self):
+        """Gets senders public key string from decrypted packet"""
+        return self.sender_key

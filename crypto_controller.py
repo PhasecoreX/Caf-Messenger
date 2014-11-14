@@ -26,6 +26,7 @@
 A bunch of functions for encryption in Cafe Messenger
 """
 
+import cPickle as pickle
 import crypto
 import hdd
 import packet_gen
@@ -52,23 +53,41 @@ def get_public_key_string(private_key):
     return crypto.get_public_key_string(private_key)
 
 
-def gen_packet(packet_type, source, dest, convo_id, data, encrypt_key, sign_key):
+def gen_packet_a(source, dest, convo_id,
+                 proposed_key, encrypt_key, sign_key):
+    """Creates an encrypted authentication packet with data for sending
+
+    Args:
+        source:       Source user ID (yours)
+        dest:         Destination user ID (theirs)
+        convo_id:     ConvoID you want destination to use when contacting you
+        proposed_key: Proposed symmetric key for future communications
+        encrypt_key:  Their public key for encrypting
+        sign_key:     Your private key for signing
+
+    Returns:
+        Packet object ready for sending
+    """
+    return packet_gen.gen_auth_packet(source, dest, convo_id, proposed_key,
+                                      encrypt_key, sign_key)
+
+
+def gen_packet_s(packet_type, source, dest, convo_id,
+                 data, encrypt_key, sign_key):
     """Creates an encrypted packet with data for sending
 
     Args:
         packet_type: Type of packet we are sending:
                      - (M) message
-                     - (C) command, or
-                     - (A) authentication
-        source:      Source user ID
-        dest:        Destination user ID
+                     - (C) command
+        source:      Source user ID (yours)
+        dest:        Destination user ID (theirs)
         convo_id:    Destination user conversation ID
         data:        Data to send:
-                     - (M) message
-                     - (C) command, or
-                     - (A) proposed symmetric key
-        encrypt_key: Key for encrypting (symmetric or private, depending.)
-        sign_key:    Private key for signing each packet
+                     - (M) Raw message
+                     - (C) command
+        encrypt_key: Conversations symmetric key for encrypting
+        sign_key:    Your private key for signing
 
     Returns:
         Packet object ready for sending
@@ -79,31 +98,34 @@ def gen_packet(packet_type, source, dest, convo_id, data, encrypt_key, sign_key)
     if packet_type == "C":
         return packet_gen.gen_command_packet(source, dest, convo_id, data,
                                              encrypt_key, sign_key)
-    if packet_type == "A":
-        return packet_gen.gen_auth_packet(source, dest, convo_id, data,
-                                          encrypt_key, sign_key)
+    return False
 
 
-def decrypt_packet(packet, encrypt_key, sender_key = None):
+def decrypt_packet_a(packet, encrypt_key):
+    """Decrypts an authentication packet
+
+    Args:
+        packet:      Authentication packet to be decrypted
+        encrypt_key: Your private key for decrypting
+
+    Returns:
+        DecryptedPacketA object ready for parsing
+    """
+    return packet_gen.decrypt_packet_a(packet, encrypt_key)
+
+
+def decrypt_packet_s(packet, encrypt_key, sender_key):
     """Decrypts a packet
 
     Args:
-        packet_type: Type of packet we are decrypting
-                     - (M) message
-                     - (C) command, or
-                     - (A) authentication
         packet:      Packet to be decrypted
-        encrypt_key: Key for decrypting (symmetric or private, depending.)
+        encrypt_key: Your private key for decrypting
         sender_key:  Public key of sender for checking signature
 
     Returns:
-        Decrypted_Packet object ready for parsing
+        DecryptedPacketS object ready for parsing
     """
-    p_type = packet.packet_gen.get_packet_type()
-    if p_type == "A":
-        return packet_gen.decrypt_packet_a(packet, encrypt_key)
-    if p_type == "M" or p_type == "C":
-        return packet_gen.decrypt_packet_s(packet, encrypt_key, sender_key)
+    return packet_gen.decrypt_packet_s(packet, encrypt_key, sender_key)
 
 
 def verify_packet(packet, sender_key):
@@ -124,7 +146,7 @@ def verify_packet(packet, sender_key):
                  packet.get_destination() +
                  packet.get_convo_id() +
                  pickle.dumps(packet.get_data()))
-    return verify(sender_key, to_verify, packet.get_signature())
+    return crypto.verify(sender_key, to_verify, packet.get_signature())
 
 
 def get_profile_list():
@@ -301,4 +323,55 @@ def rename_friend(name, friend_old, friend_new):
 
 
 if __name__ == "__main__":
-    print add_friend("test", "friend39", "friend2")
+    print "This is how you encrypt packets!"
+    print ""
+
+    print "Generating two keys..."
+    alpha_key = crypto.generate_key_pair()
+    beta_key = crypto.generate_key_pair()
+    print ""
+
+    alpha_proposed_sym = generate_symmetric_key()
+    print "[A] Generating auth packet A->B using key:  " + alpha_proposed_sym
+    print "[A] Also, I want Node B to reply to me with ConvoID 42"
+    encrypted_packet = gen_packet_a("Node A", "Node B", 42,
+                                    alpha_proposed_sym, beta_key, alpha_key)
+    print ""
+
+    print "[B] Decrypting auth packet..."
+    decrypted_packet = decrypt_packet_a(encrypted_packet, beta_key)
+    symmetric_key = decrypted_packet.get_data()
+    print "[B] Got this key -->                        " + symmetric_key
+    print ("[B] Got this convoID to use: " +
+           str(decrypted_packet.get_convo_id()))
+    print ""
+
+    print "[B] Accepted! Sending command packet 'accept 12' B->A"
+    print "[B] I want Node A to reply to me using ConvoID 12"
+    encrypted_packet = gen_packet_s("C", "None B", "Node A", 42, "accept 12",
+                                    symmetric_key, beta_key)
+    print ""
+
+    print ("[A] I got a command packet with ConvoID " +
+           str(encrypted_packet.get_convo_id()))
+    print "[A] This must be from Node B!"
+    print "[A] Decrypting command packet..."
+    decrypted_packet = decrypt_packet_s(encrypted_packet, symmetric_key,
+                                        beta_key)
+    print "[A] Got this response: '" + str(decrypted_packet.get_data()) + "'"
+    print ""
+
+    print "Awesome! Now I shall send my message 'Hello World!'"
+    print "to Node B with his preferred ConvoID 12... A->B"
+    encrypted_packet = gen_packet_s(
+        "M", "Node A", "Node B", 12, "Hello World!", symmetric_key, alpha_key)
+    print ""
+
+    print ("[B] I got a message packet with ConvoID " +
+           str(encrypted_packet.get_convo_id()))
+    print "[B] This must be from Node A!"
+    print "[B] Decrypting message packet..."
+    decrypted_packet = decrypt_packet_s(encrypted_packet, symmetric_key,
+                                        alpha_key)
+    print "[B] Got this response: '" + str(decrypted_packet.get_data()) + "'"
+    print ""

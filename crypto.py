@@ -21,7 +21,6 @@
 #  MA 02110-1301, USA.
 #
 #
-
 """crypto.py
 
 A bunch of functions for encryption in Cafe Messenger
