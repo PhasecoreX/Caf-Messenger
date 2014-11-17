@@ -7,12 +7,13 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from twisted.internet import tksupport, reactor, protocol, endpoints
-from twisted.internet.protocol import ClientFactory
-from twisted.protocols import basic
 import os
 import socket
 import time
+
+from twisted.internet import tksupport, reactor, protocol, endpoints
+from twisted.internet.protocol import ClientFactory
+from twisted.protocols import basic
 
 from CafeLoginFrame import LoginFrame
 from CafeMainFrame import MainFrame
@@ -116,6 +117,7 @@ class PubFactory(protocol.Factory):
         return PubProtocol(self)
 
 if __name__ == "__main__":
+    print socket.gethostname()
     host = socket.gethostbyname(socket.gethostname())
     print host
     print "Accepted IP's: " + HOST1 + " or " + HOST2

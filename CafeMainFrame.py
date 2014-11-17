@@ -105,6 +105,7 @@ class MainFrame(tk.Tk):
     def handle_packet(self, packet):
         """
         """
+        print "Got a packet to handle!"
         p_type = packet.get_packet_type()
         c_id = packet.get_convo_id()
 
