@@ -72,8 +72,10 @@ def gen_command_packet(source, dest, convo_id, command, encrypt_key, sign_key):
     e_source = encrypt_message(encrypt_key, source)
     e_command = encrypt_message(encrypt_key, command)
     signature = sign(sign_key,
-                     "C" + pickle.dumps(e_source) +
-                     dest + str(convo_id) +
+                     "C" + 
+                     pickle.dumps(e_source) +
+                     dest + 
+                     str(convo_id) +
                      pickle.dumps(e_command))
     return PacketS("C", e_source, dest, convo_id, e_command, signature)
 
@@ -99,10 +101,11 @@ def gen_auth_packet(source, dest, convo_id, proposed_key,
     e_sender_key = encrypt_message(proposed_key,
                                    get_public_key_string(sign_key))
     signature = sign(sign_key,
-                     "A" + pickle.dumps(e_source) +
+                     "A" + 
+                     pickle.dumps(e_source) +
                      dest +
                      pickle.dumps(e_convo_id) +
-                     pickle.dumps(e_proposed_key) +
+                     pickle.dumps(e_proposed_key) + 
                      pickle.dumps(e_sender_key))
     return PacketA(e_source, dest, e_convo_id, e_proposed_key, e_sender_key,
                    signature)

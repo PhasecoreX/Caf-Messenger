@@ -232,7 +232,7 @@ def encrypt_message(key, message):
     """
     logger = logging.getLogger('EncryptAES')
     logger.debug('Plaintext to be encrypted (using key %s): %s',
-                 key, message)
+                 repr(key), message)
     iv_random = Random.new().read(AES.block_size)
     cipher = AES.new(key, AES.MODE_CFB, iv_random)
     pad_len = AES.block_size - (len(message) % AES.block_size)

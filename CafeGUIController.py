@@ -17,8 +17,8 @@ import time
 from CafeLoginFrame import LoginFrame
 from CafeMainFrame import MainFrame
 import cPickle as pickle
-HOST1 = '148.61.112.118'
-HOST2 = '148.61.112.117'
+HOST1 = '148.61.162.209'
+HOST2 = '148.61.162.207'
 PORT = 1025
 
 
@@ -46,8 +46,12 @@ class Greeter(basic.LineReceiver):
     will route through here in the lineReceived function.
     """
 
+    def dataReceived(self, this_pickle):
+        packet = pickle.loads(this_pickle)
+        top.handle_packet(packet)
+
     def lineReceived(self, this_pickle):
-        packet = pickle.load(this_pickle)
+        packet = pickle.loads(this_pickle)
         top.handle_packet(packet)
 
         """

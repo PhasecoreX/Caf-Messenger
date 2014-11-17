@@ -45,6 +45,10 @@ class MainFrame(tk.Tk):
     def quit(self):
         """
         """
+        """
+        for i in self.winlist:
+            self.winlist[i].quit()
+        """
         reactor.stop()
 
     def add_friend(self):
@@ -72,6 +76,32 @@ class MainFrame(tk.Tk):
             print "Something went wrong with crypto.delete_friend."
             print "Consider reloading the client to get correct friend list."
 
+    def send_auth_packet(self, convo_id, sym_key, friend_RSA):
+        """
+        """
+        packet = crypto.gen_packet_a("Source", 
+                                     "Destination", 
+                                     convo_id,
+                                     sym_key, 
+                                     friend_RSA, 
+                                     self.myKeys)
+        packet_pickle = pickle.dumps(packet)
+        self.write_to_transport(packet_pickle)
+        print "Sending A packet!"
+
+    def window_closed(self, convo_id, sym_key, friend_convo_id):
+        """
+        """
+        packet = crypto.gen_packet_s("C", "Source", "Destination",
+                                     friend_convo_id,
+                                     "close " + str(convo_id),
+                                     sym_key,
+                                     self.myKeys)
+        packet_pickle = pickle.dumps(packet)
+        self.write_to_transport(packet_pickle)
+        print "Sent C(close) packet."
+        
+
     def handle_packet(self, packet):
         """
         """
@@ -88,8 +118,7 @@ class MainFrame(tk.Tk):
                                                          friend_RSA)
             if decrypted_packet_m is not False:
                 message = decrypted_packet_m.get_data()
-                self.append_message(friend, message, c_id)
-                print "Message appended!"
+                self.append_message(friend, message[:-1], c_id)
             else:
                 print "Signature does not match key, tossing packet!"
                 return 'break'
@@ -108,7 +137,17 @@ class MainFrame(tk.Tk):
                     t.set_friend_convo_id(int(command[1]))
                     print "Accept Command packet received, ready for chat."
                     return 'break'
-
+                
+                if command[0] == "close":
+                    print "Client closed window, commence closing ours."
+                    t.destroy()
+                    return 'break'
+                """
+                if command[0] == "newinstance":
+                    print "We must resend an authentication packet!"
+                    self.send_auth_packet(c_id, t.get_sym_key(), friend_RSA)
+                    return 'break'
+                """
                 print "Unknown command type. Packet thrown."
                 return 'break'
 
@@ -121,23 +160,24 @@ class MainFrame(tk.Tk):
             d_packet_a = crypto.decrypt_packet_a(packet, self.myKeys)
             public_key = d_packet_a.get_sender_key()
             for i in self.flist:
+                friend_name = i[:-4]
                 # Load a friend from our friends list.
-                friend_RSA = crypto.load_friend(self.name, i)
+                friend_RSA = crypto.load_friend(self.name, friend_name)
                 # Does this packet come from a user in our friends list?
                 if public_key == crypto.get_public_key_string(friend_RSA):
                     # Verify the integrity of the packet using its signature.
                     if crypto.verify_packet(packet, friend_RSA):
-                        number = self.recv_chat(i,
+                        number = self.recv_chat(friend_name,
                                                 d_packet_a.get_convo_id(),
                                                 d_packet_a.get_data())
                         packet = crypto.gen_packet_s("C", "Source", "Destination",
                                                      d_packet_a.get_convo_id(),
-                                                     "accept " + number,
+                                                     "accept " + str(number),
                                                      d_packet_a.get_data(),
                                                      self.myKeys)
-                        packet_pickle = pickle.dump(packet)
+                        packet_pickle = pickle.dumps(packet)
                         self.write_to_transport(packet_pickle)
-                        print "Sending C packet!"
+                        print "Sending C(accept) packet!"
                         return 'break'
                     # The packet was corrupted or signed by a stranger.
                     else:
@@ -155,11 +195,7 @@ class MainFrame(tk.Tk):
                       None, sym_key)
         self.winlist[convo_id] = t
         friend_RSA = crypto.load_friend(self.name, name)
-        packet = crypto.gen_packet_a("Source", "Destination", convo_id,
-                                     sym_key, friend_RSA, self.myKeys)
-        packet_pickle = pickle.dump(packet)
-        self.write_to_transport(packet_pickle)
-        print "Sending A packet!"
+        self.send_auth_packet(convo_id, sym_key, friend_RSA)
 
     def recv_chat(self, name, their_number, proposed_key):
         print "Chat received!"
@@ -206,8 +242,20 @@ class MainFrame(tk.Tk):
             self.winlist[convo_id].text_area_append(name, message)
         except IndexError:
             print "Another friend is trying to reach the client."
+            return 'break'
         except:
-            print "A friend was previously chatting and the client closed out."
+            print "Window is gone and the other client failed to close his."
+            """
+            packet = crypto.gen_packet_s("C", "Source", "Destination",
+                                         convo_id,
+                                         "newinstance",
+                                         d_packet_a.get_data(),
+                                         self.myKeys)
+            packet_pickle = pickle.dumps(packet)
+            self.write_to_transport(packet_pickle)
+            print "Sending C(resend) packet!"
+            """
+            return 'break'
 
     def change_chat_name(self, name):
         """This method sends a name to the chat panel to be changed.
@@ -231,7 +279,7 @@ class MainFrame(tk.Tk):
 
         packet = crypto.gen_packet_s("M", "Source", "Destination", convo_id,
                                      message, sym_key, self.myKeys)
-        packet_pickle = pickle.dump(packet)
+        packet_pickle = pickle.dumps(packet)
         self.write_to_transport(packet_pickle)
         print "Sending M packet!"
 
@@ -252,8 +300,8 @@ class MainFrame(tk.Tk):
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = MainMenu(self)
-        flist = crypto.get_friend_list(self.name)
-        self.friends = FriendPanel(self, self.name, flist)
+        self.flist = crypto.get_friend_list(self.name)
+        self.friends = FriendPanel(self, self.name, self.flist)
 
         self.title("Cafe")
         self.maxsize(200, 630)

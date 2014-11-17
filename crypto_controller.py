@@ -141,11 +141,20 @@ def verify_packet(packet, sender_key):
     Returns:
         True if authentic, false otherwise
     """
-    to_verify = (packet.get_packet_type() +
-                 pickle.dumps(packet.get_source()) +
-                 packet.get_destination() +
-                 packet.get_convo_id() +
-                 pickle.dumps(packet.get_data()))
+    
+    if packet.get_packet_type() == "A":
+        to_verify = ("A" + 
+                     pickle.dumps(packet.get_source()) +
+                     packet.get_destination() +
+                     pickle.dumps(packet.get_convo_id()) +
+                     pickle.dumps(packet.get_proposed_key()) +
+                     pickle.dumps(packet.get_sender_key()))
+    else:
+        to_verify = (packet.get_packet_type() +
+                     pickle.dumps(packet.get_source()) +
+                     packet.get_destination() +
+                     str(packet.get_convo_id()) +
+                     pickle.dumps(packet.get_data()))
     return crypto.verify(sender_key, to_verify, packet.get_signature())
 
 

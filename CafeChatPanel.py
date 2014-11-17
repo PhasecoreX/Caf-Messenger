@@ -147,6 +147,14 @@ class ChatPanel(tk.Toplevel):
     def get_friend_convo_id(self):
         return self.friend_convo_id
 
+    def quit(self):
+        """
+        """
+        self.parent.window_closed(self.convo_id, self.s_key, 
+                                  self.friend_convo_id)
+        print "Window closed."
+        self.destroy()
+
     def __init__(self, parent, name, friend_name, convo_id, friend_convo_id, s_key):
         """Initialization function.
         
@@ -173,4 +181,5 @@ class ChatPanel(tk.Toplevel):
         self.textarea = ReadOnlyText(self)
         self.sendbutton = tk.Button(self)
         self.textentry = tk.Text(self)
+        self.protocol('WM_DELETE_WINDOW', self.quit)
         self.create_widgets()
