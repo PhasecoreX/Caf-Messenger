@@ -79,7 +79,8 @@ class MainFrame(tk.Tk):
     def send_auth_packet(self, convo_id, sym_key, friend_RSA):
         """
         """
-        packet = crypto.gen_packet_a("Source", 
+        packet = crypto.gen_packet_a("A",
+                                     "Source", 
                                      "Destination", 
                                      convo_id,
                                      sym_key, 

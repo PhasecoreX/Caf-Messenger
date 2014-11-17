@@ -332,22 +332,25 @@ if __name__ == "__main__":
     print "This is how you encrypt packets!"
     print ""
 
-    print "Generating two keys..."
+    print "Generating two asymmetric keys..."
     alpha_key = crypto.generate_key_pair()
     beta_key = crypto.generate_key_pair()
     print ""
 
     alpha_proposed_sym = generate_symmetric_key()
-    print "[A] Generating auth packet A->B using key:  " + alpha_proposed_sym
+    print "----------Node A----------"
+    print "[A] Generating auth packet A->B using randomly generated"
+    print "    symmetric key:   " + alpha_proposed_sym
     print "[A] Also, I want Node B to reply to me with ConvoID 42"
     encrypted_packet = gen_packet_a("A", "Node A", "Node B", 42,
                                     alpha_proposed_sym, beta_key, alpha_key)
     print ""
 
+    print "----------Node B----------"
     print "[B] Decrypting auth packet..."
     decrypted_packet = decrypt_packet_a(encrypted_packet, beta_key)
     symmetric_key = decrypted_packet.get_data()
-    print "[B] Got this key -->                        " + symmetric_key
+    print "[B] Got this key --> " + symmetric_key
     print ("[B] Got this convoID to use: " +
            str(decrypted_packet.get_convo_id()))
     print ""
@@ -358,6 +361,7 @@ if __name__ == "__main__":
                                     symmetric_key, beta_key)
     print ""
 
+    print "----------Node A----------"
     print ("[A] I got a command packet with ConvoID " +
            str(encrypted_packet.get_convo_id()))
     print "[A] This must be from Node B!"
@@ -365,14 +369,13 @@ if __name__ == "__main__":
     decrypted_packet = decrypt_packet_s(encrypted_packet, symmetric_key,
                                         beta_key)
     print "[A] Got this response: '" + str(decrypted_packet.get_data()) + "'"
-    print ""
-
-    print "Awesome! Now I shall send my message 'Hello World!'"
-    print "to Node B with his preferred ConvoID 12... A->B"
+    print "[A] Awesome! Now I shall send my message 'Hello World!'"
+    print "    to Node B with his preferred ConvoID 12... A->B"
     encrypted_packet = gen_packet_s(
         "M", "Node A", "Node B", 12, "Hello World!", symmetric_key, alpha_key)
     print ""
 
+    print "----------Node B----------"
     print ("[B] I got a message packet with ConvoID " +
            str(encrypted_packet.get_convo_id()))
     print "[B] This must be from Node A!"
