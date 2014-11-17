@@ -7,18 +7,21 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from twisted.internet import tksupport, reactor, protocol, endpoints
-from twisted.internet.protocol import ClientFactory
-from twisted.protocols import basic
 import os
 import socket
 import time
 
+from twisted.internet import tksupport, reactor, protocol, endpoints
+from twisted.internet.protocol import ClientFactory
+from twisted.protocols import basic
+
 from CafeLoginFrame import LoginFrame
 from CafeMainFrame import MainFrame
 import cPickle as pickle
-HOST1 = '148.61.112.118'
-HOST2 = '148.61.112.117'
+
+
+HOST1 = '35.40.217.203'
+HOST2 = '35.40.139.16'
 PORT = 1025
 
 
@@ -47,7 +50,8 @@ class Greeter(basic.LineReceiver):
     """
 
     def lineReceived(self, this_pickle):
-        packet = pickle.load(this_pickle)
+        print "Line has been received!"
+        packet = pickle.loads(this_pickle)
         top.handle_packet(packet)
 
         """
@@ -112,6 +116,7 @@ class PubFactory(protocol.Factory):
         return PubProtocol(self)
 
 if __name__ == "__main__":
+    print socket.gethostname()
     host = socket.gethostbyname(socket.gethostname())
     print host
     print "Accepted IP's: " + HOST1 + " or " + HOST2

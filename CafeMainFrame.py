@@ -75,6 +75,7 @@ class MainFrame(tk.Tk):
     def handle_packet(self, packet):
         """
         """
+        print "Got a packet to handle!"
         p_type = packet.get_packet_type()
         c_id = packet.get_convo_id()
 
@@ -135,7 +136,7 @@ class MainFrame(tk.Tk):
                                                      "accept " + number,
                                                      d_packet_a.get_data(),
                                                      self.myKeys)
-                        packet_pickle = pickle.dump(packet)
+                        packet_pickle = pickle.dumps(packet)
                         self.write_to_transport(packet_pickle)
                         print "Sending C packet!"
                         return 'break'
@@ -157,7 +158,7 @@ class MainFrame(tk.Tk):
         friend_RSA = crypto.load_friend(self.name, name)
         packet = crypto.gen_packet_a("Source", "Destination", convo_id,
                                      sym_key, friend_RSA, self.myKeys)
-        packet_pickle = pickle.dump(packet)
+        packet_pickle = pickle.dumps(packet)
         self.write_to_transport(packet_pickle)
         print "Sending A packet!"
 
@@ -231,7 +232,7 @@ class MainFrame(tk.Tk):
 
         packet = crypto.gen_packet_s("M", "Source", "Destination", convo_id,
                                      message, sym_key, self.myKeys)
-        packet_pickle = pickle.dump(packet)
+        packet_pickle = pickle.dumps(packet)
         self.write_to_transport(packet_pickle)
         print "Sending M packet!"
 
