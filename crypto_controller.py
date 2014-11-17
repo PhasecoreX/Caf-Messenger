@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  crypto.py
+#  crypto_controller.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #
@@ -53,11 +53,13 @@ def get_public_key_string(private_key):
     return crypto.get_public_key_string(private_key)
 
 
-def gen_packet_a(source, dest, convo_id,
+def gen_packet_a(packet_type, source, dest, convo_id,
                  proposed_key, encrypt_key, sign_key):
     """Creates an encrypted authentication packet with data for sending
 
     Args:
+        packet_type:  Type of packet we are sending:
+                      - (A) authentication
         source:       Source user ID (yours)
         dest:         Destination user ID (theirs)
         convo_id:     ConvoID you want destination to use when contacting you
@@ -68,8 +70,8 @@ def gen_packet_a(source, dest, convo_id,
     Returns:
         Packet object ready for sending
     """
-    return packet_gen.gen_auth_packet(source, dest, convo_id, proposed_key,
-                                      encrypt_key, sign_key)
+    return packet_gen.gen_packet_a(packet_type, source, dest, convo_id,
+                                   proposed_key, encrypt_key, sign_key)
 
 
 def gen_packet_s(packet_type, source, dest, convo_id,
@@ -92,13 +94,8 @@ def gen_packet_s(packet_type, source, dest, convo_id,
     Returns:
         Packet object ready for sending
     """
-    if packet_type == "M":
-        return packet_gen.gen_message_packet(source, dest, convo_id, data,
-                                             encrypt_key, sign_key)
-    if packet_type == "C":
-        return packet_gen.gen_command_packet(source, dest, convo_id, data,
-                                             encrypt_key, sign_key)
-    return False
+    return packet_gen.gen_packet_s(packet_type, source, dest, convo_id, data,
+                                   encrypt_key, sign_key)
 
 
 def decrypt_packet_a(packet, encrypt_key):
@@ -141,9 +138,9 @@ def verify_packet(packet, sender_key):
     Returns:
         True if authentic, false otherwise
     """
-    
+
     if packet.get_packet_type() == "A":
-        to_verify = ("A" + 
+        to_verify = ("A" +
                      pickle.dumps(packet.get_source()) +
                      packet.get_destination() +
                      pickle.dumps(packet.get_convo_id()) +
@@ -343,7 +340,7 @@ if __name__ == "__main__":
     alpha_proposed_sym = generate_symmetric_key()
     print "[A] Generating auth packet A->B using key:  " + alpha_proposed_sym
     print "[A] Also, I want Node B to reply to me with ConvoID 42"
-    encrypted_packet = gen_packet_a("Node A", "Node B", 42,
+    encrypted_packet = gen_packet_a("A", "Node A", "Node B", 42,
                                     alpha_proposed_sym, beta_key, alpha_key)
     print ""
 

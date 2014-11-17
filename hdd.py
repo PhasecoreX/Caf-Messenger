@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_crypto.py
+#  hdd.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #

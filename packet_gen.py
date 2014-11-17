@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_crypto.py
+#  packet_gen.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #
@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 #
 #
-"""packet_crypto.py
+"""packet_gen.py
 
 Makes encryption and packet generation even easier!
 """
@@ -32,56 +32,33 @@ from packet import PacketS, PacketA, DecryptedPacketS, DecryptedPacketA
 import cPickle as pickle
 
 
-def gen_message_packet(source, dest, convo_id, message, encrypt_key, sign_key):
-    """Creates a packet with data for message sending
-
-    Args:
-        source:      Where the packet came from (you)
-        destination: 8 Hex character destination (them)
-        convo_id:    Conversation ID (the one they want you to use)
-        message:     Raw string message
-        encrypt_key: Conversations symmetric encrtyption key
-        sign_key:    Your private key for signing
-
-    Returns:
-        PacketS object ready for sending
-    """
-    e_source = encrypt_message(encrypt_key, source)
-    e_message = encrypt_message(encrypt_key, message)
-    signature = sign(sign_key,
-                     "M" + pickle.dumps(e_source) +
-                     dest + str(convo_id) +
-                     pickle.dumps(e_message))
-    return PacketS("M", e_source, dest, convo_id, e_message, signature)
-
-
-def gen_command_packet(source, dest, convo_id, command, encrypt_key, sign_key):
+def gen_packet_s(packet_type, source, dest, convo_id, data, encrypt_key,
+                 sign_key):
     """Creates a packet with data for command sending
 
     Args:
         source:      Where the packet came from (you)
         destination: 8 Hex character destination (them)
         convo_id:    Conversation ID (the one they want you to use)
-        command:     Raw string command
-        encrypt_key: Conversations symmetric encrtyption key
+        data:        Raw string command
+        encrypt_key: Conversations symmetric encryption key
         sign_key:    Your private key for signing
 
     Returns:
         PacketS object ready for sending
     """
     e_source = encrypt_message(encrypt_key, source)
-    e_command = encrypt_message(encrypt_key, command)
+    e_data = encrypt_message(encrypt_key, data)
     signature = sign(sign_key,
-                     "C" + 
-                     pickle.dumps(e_source) +
-                     dest + 
-                     str(convo_id) +
-                     pickle.dumps(e_command))
-    return PacketS("C", e_source, dest, convo_id, e_command, signature)
+                     str(packet_type) + pickle.dumps(e_source) +
+                     str(dest) + str(convo_id) +
+                     pickle.dumps(e_data))
+    return PacketS(str(packet_type), e_source, str(dest), convo_id, e_data,
+                   signature)
 
 
-def gen_auth_packet(source, dest, convo_id, proposed_key,
-                    encrypt_key, sign_key):
+def gen_packet_a(packet_type, source, dest, convo_id, proposed_key,
+                 encrypt_key, sign_key):
     """Creates a packet with data for initializing a communication line
 
     Args:
@@ -101,11 +78,10 @@ def gen_auth_packet(source, dest, convo_id, proposed_key,
     e_sender_key = encrypt_message(proposed_key,
                                    get_public_key_string(sign_key))
     signature = sign(sign_key,
-                     "A" + 
-                     pickle.dumps(e_source) +
-                     dest +
+                     str(packet_type) + pickle.dumps(e_source) +
+                     str(dest) +
                      pickle.dumps(e_convo_id) +
-                     pickle.dumps(e_proposed_key) + 
+                     pickle.dumps(e_proposed_key) +
                      pickle.dumps(e_sender_key))
     return PacketA(e_source, dest, e_convo_id, e_proposed_key, e_sender_key,
                    signature)
