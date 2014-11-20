@@ -1,0 +1,20 @@
+caf-messenger/  
+    __init__.py
+    crypto/
+        __init__.py
+        crypto.py
+        crypto_controller.py
+        hdd.py
+        packet.py
+        packet_gen.py
+    gui/
+        __init__.py
+        CafeAddFriendFrame.py
+        CafeChatPanel.py
+        CafeFriendPanel.py
+        CafeGUIController.py
+        CafeLoginFrame.py
+        CafeMainFrame.py
+        CafeMainMenuBar.py
+        CafeNewUserFrame.py
+        CafeReadOnlyText.py
