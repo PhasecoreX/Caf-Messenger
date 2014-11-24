@@ -12,7 +12,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import Tkinter as tk
-import crypto_controller as crypto
+import crypto.crypto_controller as crypto
 from CafeNewUserFrame import NewUserWindow
 
 

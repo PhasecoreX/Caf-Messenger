@@ -15,11 +15,11 @@ from twisted.internet import tksupport, reactor, protocol, endpoints
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols import basic
 
-from CafeLoginFrame import LoginFrame
-from CafeMainFrame import MainFrame
+from gui.CafeLoginFrame import LoginFrame
+from gui.CafeMainFrame import MainFrame
 import cPickle as pickle
-HOST1 = '148.61.162.209'
-HOST2 = '148.61.162.207'
+HOST1 = '148.61.162.108'
+HOST2 = '148.61.162.112'
 PORT = 1025
 
 

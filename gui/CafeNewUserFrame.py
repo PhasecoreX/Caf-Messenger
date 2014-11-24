@@ -11,7 +11,7 @@
 
 import Tkinter as tk
 
-import crypto_controller as crypto
+import crypto.crypto_controller as crypto
 
 
 class NewUserWindow(tk.Toplevel):

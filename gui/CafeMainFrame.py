@@ -17,7 +17,7 @@ from CafeFriendPanel import FriendPanel
 from CafeMainMenuBar import MainMenu
 import Tkinter as tk
 import cPickle as pickle
-import crypto_controller as crypto
+import crypto.crypto_controller as crypto
 
 
 HOST = ''
@@ -56,6 +56,7 @@ class MainFrame(tk.Tk):
         """
         t = AddFriend(self, crypto.get_public_key_string(self.myKeys))
         t.grab_set()
+        self.flist = crypto.get_friend_list(self.name)
 
     def confirm_friend(self, info):
         """
