@@ -44,6 +44,7 @@ class FriendPanel(tk.Frame):
 
         self.flist.config(width=185, height=505)
         self.flist.place(x=0, y=25, anchor="nw", width=185, height=505)
+        self.flist.bind("<Double-Button-1>", self.double_click)
 
         self.addbutton.config(text="Add Friend", width=90, height=20)
         self.addbutton.config(command=self.add_button_pressed)
@@ -54,7 +55,7 @@ class FriendPanel(tk.Frame):
         self.chatbutton.config(command=self.chat_button_pressed)
         self.chatbutton.place(x=0, y=560, anchor="nw", width=90,
                               height=20)
-        print self.flist.get("anchor")
+        self.flist.select_anchor(0)
 
         self.removebutton.config(text="Remove", width=90, height=20)
         self.removebutton.config(command=self.remove_button_pressed)
@@ -63,6 +64,8 @@ class FriendPanel(tk.Frame):
         if (self.flist.get(0) is ""):
             self.chatbutton.config(state="disabled")
             self.removebutton.config(state="disabled")
+            
+            
 
     def add_button_pressed(self):
         """
@@ -75,6 +78,9 @@ class FriendPanel(tk.Frame):
         self.flist.insert("end", name)
         self.chatbutton.config(state="normal")
         self.removebutton.config(state="normal")
+
+    def double_click(self, e):
+        self.chat_button_pressed()
 
     def chat_button_pressed(self):
         """

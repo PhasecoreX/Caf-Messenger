@@ -19,6 +19,7 @@ import Tkinter as tk
 import cPickle as pickle
 import crypto.crypto_controller as crypto
 
+import random
 
 HOST = ''
 PORT = 1025
@@ -45,10 +46,6 @@ class MainFrame(tk.Tk):
     def quit(self):
         """
         """
-        """
-        for i in self.winlist:
-            self.winlist[i].quit()
-        """
         reactor.stop()
 
     def add_friend(self):
@@ -64,6 +61,8 @@ class MainFrame(tk.Tk):
         try:
             if crypto.add_friend(self.name, info["name"], info["key"]):
                 self.friends.add_friend(info["name"])
+                self.conn[info["name"]] = (None, -1)
+                self.print_connections()
                 return 0
             else:
                 return 1
@@ -76,6 +75,9 @@ class MainFrame(tk.Tk):
         if not crypto.delete_friend(self.name, name):
             print "Something went wrong with crypto.delete_friend."
             print "Consider reloading the client to get correct friend list."
+        else:
+            del self.conn[name]
+            self.print_connections()
 
     def send_auth_packet(self, convo_id, sym_key, friend_RSA):
         """
@@ -98,6 +100,9 @@ class MainFrame(tk.Tk):
                                      "close " + str(convo_id),
                                      sym_key,
                                      self.myKeys)
+        for i in self.conn:
+            if self.conn[i][1] is convo_id:
+                self.conn[i] = (None, -1)
         self.write_to_transport(packet)
         print "Sent C(close) packet."
 
@@ -144,9 +149,8 @@ class MainFrame(tk.Tk):
                     t.destroy()
                     return 'break'
                 """
-                if command[0] == "newinstance":
-                    print "We must resend an authentication packet!"
-                    self.send_auth_packet(c_id, t.get_sym_key(), friend_RSA)
+                if command[0] == "future_command":
+                    print "This is a blank space for a potentially new command"
                     return 'break'
                 """
                 print "Unknown command type. Packet thrown."
@@ -189,12 +193,28 @@ class MainFrame(tk.Tk):
             return 'break'
 
     def send_chat(self, name):
+        # Are we already chatting with that user?
+        for i in self.conn:
+            if i == name:
+                if not self.conn[i][1] == -1:
+                    print "Already chatting with that user!"
+                    return 'break'
+        
+        # New chat session!
         print "Chat Start!"
         sym_key = crypto.generate_symmetric_key()
         convo_id = self.generate_convo_id()
         t = ChatPanel(self, self.name, name, convo_id,
                       None, sym_key)
         self.winlist[convo_id] = t
+        # TODO Get ip info from DHT, populate connection list
+        #
+        # Add a mechanic to deny if the person is offline
+        # self.conn[name] = {reactor.connectTCP(ip, PORT, GreeterFactory()), convo_id}
+        # 
+        
+        self.conn[name] = ("Some stuff", convo_id)
+        
         friend_RSA = crypto.load_friend(self.name, name)
         self.send_auth_packet(convo_id, sym_key, friend_RSA)
 
@@ -207,6 +227,7 @@ class MainFrame(tk.Tk):
         return convo_id
 
     def generate_convo_id(self):
+        """
         """
         """
         number = -1
@@ -222,15 +243,12 @@ class MainFrame(tk.Tk):
         """
         flag = True
         while flag:
-            number = rndm.randrange(10000)
+            number = random.randrange(10000)
             try:
                 self.winlist[number]
             except KeyError:
-                t = ChatPanel(self, name, number)
-                self.winlist[number] = t
-                print number
-                flag = False
-        """
+                return number
+        
 
     def append_message(self, name, message, convo_id):
         """This method sends a message and name to the chat panel.
@@ -284,7 +302,25 @@ class MainFrame(tk.Tk):
         print "Sending M packet!"
 
     def write_to_transport(self, packet):
-        self.conn.transport.write(packet)
+        """
+        """
+        print "For now no connections are made. Instead print out conn table!"
+        self.print_connections()
+        # self.conn.transport.write(packet)
+
+    def populate_connections_list(self):
+        """
+        """
+        for i in self.flist:
+            friend_name = i[:-4]
+            self.conn[friend_name] = (None, -1)
+
+    def print_connections(self):
+        """
+        """
+        for i in self.conn:
+            print i + " " + str(self.conn[i][1])
+        print ""
 
     def __init__(self, controller, conn, myKeys, name, *args, **kwargs):
         """
@@ -296,11 +332,12 @@ class MainFrame(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
         self.chatCount = 0
         self.winlist = {}
-        self.conn = conn
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.menubar = MainMenu(self)
         self.flist = crypto.get_friend_list(self.name)
+        self.populate_connections_list()
+        self.print_connections()
         self.friends = FriendPanel(self, self.name, self.flist)
 
         self.title("Cafe")

@@ -3,7 +3,10 @@
 # CafeGUIController.py
 # Authors: Michael Currie & Mark Aiken
 #
-#
+#   Requires:
+#   twisted
+#   PyCrypto
+#   idlib
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -17,6 +20,7 @@ import time
 from gui.CafeLoginFrame import LoginFrame
 from gui.CafeMainFrame import MainFrame
 import cPickle as pickle
+
 HOST1 = '148.61.162.116'
 HOST2 = '148.61.162.115'
 PORT = 1025
@@ -129,6 +133,8 @@ if __name__ == "__main__":
             print "This is not a usable computer for testing."
             print "Please change the predetermined ip addresses at the top."
             quit()
+
+
     this = RSAObject()
     top = LoginFrame(this)
     top.mainloop()
@@ -158,7 +164,8 @@ if __name__ == "__main__":
     """
 
     reactor.listenTCP(PORT, GreeterFactory())
-    conn = reactor.connectTCP(friend, PORT, GreeterFactory())
+    conn = {}
+    # conn = reactor.connectTCP(friend, PORT, GreeterFactory())
     top = MainFrame(None, conn, this.get(), this.get_name())
     tksupport.install(top)
     reactor.run()
