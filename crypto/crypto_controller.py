@@ -125,6 +125,32 @@ def decrypt_packet_s(packet, encrypt_key, sender_key):
     return packet_gen.decrypt_packet_s(packet, encrypt_key, sender_key)
 
 
+def json_get_packet_type(json_packet_string):
+    """Returns the packet type from a JSON packet
+
+    Args:
+        json_packet_string: Packet to get ConvoID from
+
+    Returns:
+        Packet type of packet
+        False if packet_type is missing
+    """
+    return packet_gen.json_get_packet_type(json_packet_string)
+
+
+def json_get_convo_id(json_packet_string):
+    """Returns the ConvoID from a JSON packet
+
+    Args:
+        json_packet_string: Packet to get ConvoID from
+
+    Returns:
+        ConvoID of packet
+        False if convo_id is encrypted/missing
+    """
+    return packet_gen.json_get_convo_id(json_packet_string)
+
+
 def verify_packet(packet, sender_key):
     """Checks signature on packet
 
@@ -363,7 +389,7 @@ if __name__ == "__main__":
 
     print "----------Node A----------"
     print ("[A] I got a command packet with ConvoID " +
-           str(encrypted_packet.get_convo_id()))
+           str(json_get_convo_id(encrypted_packet)))
     print "[A] This must be from Node B!"
     print "[A] Decrypting command packet..."
     decrypted_packet = decrypt_packet_s(encrypted_packet, symmetric_key,
@@ -377,7 +403,7 @@ if __name__ == "__main__":
 
     print "----------Node B----------"
     print ("[B] I got a message packet with ConvoID " +
-           str(encrypted_packet.get_convo_id()))
+           str(json_get_convo_id(encrypted_packet)))
     print "[B] This must be from Node A!"
     print "[B] Decrypting message packet..."
     decrypted_packet = decrypt_packet_s(encrypted_packet, symmetric_key,
