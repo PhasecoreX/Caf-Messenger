@@ -81,14 +81,13 @@ class MainFrame(tk.Tk):
         """
         """
         packet = crypto.gen_packet_a("A",
-                                     "Source", 
-                                     "Destination", 
+                                     "Source",
+                                     "Destination",
                                      convo_id,
-                                     sym_key, 
-                                     friend_RSA, 
+                                     sym_key,
+                                     friend_RSA,
                                      self.myKeys)
-        packet_pickle = pickle.dumps(packet)
-        self.write_to_transport(packet_pickle)
+        self.write_to_transport(packet)
         print "Sending A packet!"
 
     def window_closed(self, convo_id, sym_key, friend_convo_id):
@@ -99,17 +98,15 @@ class MainFrame(tk.Tk):
                                      "close " + str(convo_id),
                                      sym_key,
                                      self.myKeys)
-        packet_pickle = pickle.dumps(packet)
-        self.write_to_transport(packet_pickle)
+        self.write_to_transport(packet)
         print "Sent C(close) packet."
-        
 
     def handle_packet(self, packet):
         """
         """
         print "Got a packet to handle!"
-        p_type = packet.get_packet_type()
-        c_id = packet.get_convo_id()
+        p_type = crypto.json_get_packet_type(packet)
+        c_id = crypto.json_get_convo_id(packet)
 
         if p_type == "M":
             print "M Type Packet received."
@@ -140,7 +137,7 @@ class MainFrame(tk.Tk):
                     t.set_friend_convo_id(int(command[1]))
                     print "Accept Command packet received, ready for chat."
                     return 'break'
-                
+
                 if command[0] == "close":
                     print "Client closed window, commence closing ours."
                     t.destroy()
@@ -173,13 +170,13 @@ class MainFrame(tk.Tk):
                         number = self.recv_chat(friend_name,
                                                 d_packet_a.get_convo_id(),
                                                 d_packet_a.get_data())
-                        packet = crypto.gen_packet_s("C", "Source", "Destination",
+                        packet = crypto.gen_packet_s("C", "Source",
+                                                     "Destination",
                                                      d_packet_a.get_convo_id(),
                                                      "accept " + str(number),
                                                      d_packet_a.get_data(),
                                                      self.myKeys)
-                        packet_pickle = pickle.dumps(packet)
-                        self.write_to_transport(packet_pickle)
+                        self.write_to_transport(packet)
                         print "Sending C(accept) packet!"
                         return 'break'
                     # The packet was corrupted or signed by a stranger.
@@ -282,12 +279,11 @@ class MainFrame(tk.Tk):
 
         packet = crypto.gen_packet_s("M", "Source", "Destination", convo_id,
                                      message, sym_key, self.myKeys)
-        packet_pickle = pickle.dumps(packet)
-        self.write_to_transport(packet_pickle)
+        self.write_to_transport(packet)
         print "Sending M packet!"
 
-    def write_to_transport(self, packet_pickle):
-        self.conn.transport.write(packet_pickle)
+    def write_to_transport(self, packet):
+        self.conn.transport.write(packet)
 
     def __init__(self, controller, conn, myKeys, name, *args, **kwargs):
         """

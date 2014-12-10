@@ -26,7 +26,9 @@
 A bunch of functions for encryption in Cafe Messenger
 """
 
-import cPickle as pickle
+import base64
+import json
+
 import crypto
 import hdd
 import packet_gen
@@ -158,27 +160,24 @@ def verify_packet(packet, sender_key):
     who it's from
 
     Args:
-        packet:      Packet to be decrypted
+        packet:      JSON string packet to be decrypted
         sender_key:  Public key of sender for checking signature
 
     Returns:
         True if authentic, false otherwise
     """
-
-    if packet.get_packet_type() == "A":
-        to_verify = ("A" +
-                     pickle.dumps(packet.get_source()) +
-                     packet.get_destination() +
-                     pickle.dumps(packet.get_convo_id()) +
-                     pickle.dumps(packet.get_proposed_key()) +
-                     pickle.dumps(packet.get_sender_key()))
+    if json_get_packet_type(packet) == "A":
+        jsonpacket = json.loads(packet)
+        to_verify = (jsonpacket['packet_type'] +
+                     jsonpacket['e_source'] +
+                     jsonpacket['dest'] +
+                     jsonpacket['e_convo_id'] +
+                     jsonpacket['e_proposed_key'] +
+                     jsonpacket['e_sender_key'])
+        return crypto.verify(sender_key, to_verify,
+                             base64.b64decode(jsonpacket['signature']))
     else:
-        to_verify = (packet.get_packet_type() +
-                     pickle.dumps(packet.get_source()) +
-                     packet.get_destination() +
-                     str(packet.get_convo_id()) +
-                     pickle.dumps(packet.get_data()))
-    return crypto.verify(sender_key, to_verify, packet.get_signature())
+        return packet_gen.sym_verify(packet, sender_key)
 
 
 def get_profile_list():
@@ -370,6 +369,7 @@ if __name__ == "__main__":
     print "[A] Also, I want Node B to reply to me with ConvoID 42"
     encrypted_packet = gen_packet_a("A", "Node A", "Node B", 42,
                                     alpha_proposed_sym, beta_key, alpha_key)
+    print encrypted_packet
     print ""
 
     print "----------Node B----------"
@@ -385,6 +385,7 @@ if __name__ == "__main__":
     print "[B] I want Node A to reply to me using ConvoID 12"
     encrypted_packet = gen_packet_s("C", "None B", "Node A", 42, "accept 12",
                                     symmetric_key, beta_key)
+    print encrypted_packet
     print ""
 
     print "----------Node A----------"
@@ -399,6 +400,7 @@ if __name__ == "__main__":
     print "    to Node B with his preferred ConvoID 12... A->B"
     encrypted_packet = gen_packet_s(
         "M", "Node A", "Node B", 12, "Hello World!", symmetric_key, alpha_key)
+    print encrypted_packet
     print ""
 
     print "----------Node B----------"

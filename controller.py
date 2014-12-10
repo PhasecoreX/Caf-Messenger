@@ -7,20 +7,18 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+from twisted.internet import tksupport, reactor, protocol, endpoints
+from twisted.internet.protocol import ClientFactory
+from twisted.protocols import basic
 import os
 import socket
 import time
 
-from twisted.internet import tksupport, reactor, protocol, endpoints
-from twisted.internet.protocol import ClientFactory
-from twisted.protocols import basic
-
-import cPickle as pickle
 from gui.CafeLoginFrame import LoginFrame
 from gui.CafeMainFrame import MainFrame
-
-HOST1 = '148.61.162.108'
-HOST2 = '148.61.162.112'
+import cPickle as pickle
+HOST1 = '127.0.1.1'
+HOST2 = '127.0.1.1'
 PORT = 1025
 
 
@@ -48,12 +46,10 @@ class Greeter(basic.LineReceiver):
     will route through here in the lineReceived function.
     """
 
-    def dataReceived(self, this_pickle):
-        packet = pickle.loads(this_pickle)
+    def dataReceived(self, packet):
         top.handle_packet(packet)
 
-    def lineReceived(self, this_pickle):
-        packet = pickle.loads(this_pickle)
+    def lineReceived(self, packet):
         top.handle_packet(packet)
 
         """

@@ -21,7 +21,6 @@
 #  MA 02110-1301, USA.
 #
 #
-from hachoir_parser.network.tcpdump import Packet
 """packet_gen.py
 
 Makes encryption and packet generation even easier!
@@ -121,14 +120,8 @@ def decrypt_packet_s(packet, encrypt_key, sender_key):
     Returns:
         DecryptedPacketS object ready for parsing
     """
-    jsonpacket = json.loads(packet)
-    to_verify = (jsonpacket['packet_type'] +
-                 jsonpacket['e_source'] +
-                 jsonpacket['dest'] +
-                 jsonpacket['convo_id'] +
-                 jsonpacket['e_data'])
-    if verify(sender_key, to_verify,
-              base64.b64decode(jsonpacket['signature'])):
+    if sym_verify(packet, sender_key):
+        jsonpacket = json.loads(packet)
         d_source = decrypt_message(encrypt_key,
                                    base64.b64decode(jsonpacket['e_source']))
         d_data = decrypt_message(encrypt_key,
@@ -150,13 +143,6 @@ def decrypt_packet_a(packet, private_key):
     Returns:
         DecryptedPacketA object ready for parsing
     """
-    """
-    to_verify = (packet.get_packet_type() +
-                 pickle.dumps(packet.get_source()) +
-                 packet.get_destination() +
-                 str(packet.get_convo_id()) +
-                 pickle.dumps(packet.get_data()))
-    """
     # For auth packets, the proposed symmetric key used for encrypting the
     # rest of the packet.
     jsonpacket = json.loads(packet)
@@ -177,6 +163,27 @@ def decrypt_packet_a(packet, private_key):
     # return False
 
 
+def sym_verify(packet, sender_key):
+    """Checks signature on symmetric packet
+
+    Args:
+        packet:     Symmetric packet to be verified
+        sender_key: Senders public key to verify with
+
+    Returns:
+        True if valid
+        False otherwise
+    """
+    jsonpacket = json.loads(packet)
+    to_verify = (jsonpacket['packet_type'] +
+                 jsonpacket['e_source'] +
+                 jsonpacket['dest'] +
+                 jsonpacket['convo_id'] +
+                 jsonpacket['e_data'])
+    return verify(sender_key, to_verify,
+                  base64.b64decode(jsonpacket['signature']))
+
+
 def json_get_convo_id(json_packet_string):
     """Returns the ConvoID from a JSON packet
 
@@ -188,9 +195,9 @@ def json_get_convo_id(json_packet_string):
         False if convo_id is encrypted/missing
     """
     jsonpacket = json.loads(json_packet_string)
-    if jsonpacket['convo_id']:
+    try:
         return jsonpacket['convo_id']
-    else:
+    except KeyError:
         return False
 
 
@@ -205,7 +212,7 @@ def json_get_packet_type(json_packet_string):
         False if packet_type is missing
     """
     jsonpacket = json.loads(json_packet_string)
-    if jsonpacket['packet_type']:
+    try:
         return jsonpacket['packet_type']
-    else:
+    except KeyError:
         return False
