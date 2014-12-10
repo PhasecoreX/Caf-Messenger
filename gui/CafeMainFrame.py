@@ -196,12 +196,17 @@ class MainFrame(tk.Tk):
 
     def send_chat(self, name):
         # Are we already chatting with that user?
+        def openChat(whatevs):
+            self.conn[name] = (self.conn[name][0], convo_id)
+            friend_RSA = crypto.load_friend(self.name, name)
+            self.send_auth_packet(convo_id, sym_key, friend_RSA)
+
         for i in self.conn:
             if i == name:
                 if not self.conn[i][1] == -1:
                     print "Already chatting with that user!"
                     return 'break'
-        
+
         # New chat session!
         print "Chat Start!"
         sym_key = crypto.generate_symmetric_key()
@@ -209,13 +214,9 @@ class MainFrame(tk.Tk):
         t = ChatPanel(self, self.name, name, convo_id,
                       None, sym_key)
         self.winlist[convo_id] = t
-        reactor.connectTCP(self.conn[name][0][0], 
-                           self.conn[name][0][1], 
-                           GreeterFactory())
-        self.conn[name] = (self.conn[name][0], convo_id)
-        
-        friend_RSA = crypto.load_friend(self.name, name)
-        self.send_auth_packet(convo_id, sym_key, friend_RSA)
+        reactor.connectTCP(self.conn[name][0][0],
+                           self.conn[name][0][1],
+                           GreeterFactory()).addCallback(openChat)
 
     def recv_chat(self, name, their_number, proposed_key):
         print "Chat received!"
@@ -223,8 +224,8 @@ class MainFrame(tk.Tk):
         t = ChatPanel(self, self.name, name, convo_id,
                       their_number, proposed_key)
         self.winlist[convo_id] = t
-        reactor.connectTCP(self.conn[name][0][0], 
-                           self.conn[name][0][1], 
+        reactor.connectTCP(self.conn[name][0][0],
+                           self.conn[name][0][1],
                            GreeterFactory())
         self.conn[name] = (self.conn[name][0], convo_id)
         return convo_id
@@ -251,7 +252,7 @@ class MainFrame(tk.Tk):
                 self.winlist[number]
             except KeyError:
                 return number
-        
+
 
     def append_message(self, name, message, convo_id):
         """This method sends a message and name to the chat panel.
@@ -314,14 +315,14 @@ class MainFrame(tk.Tk):
     def populate_connections_list(self):
         """
         """
-        
+
         def friend_ip_connector(info):
             print "THIS IS THE STUFF---------------------"
             print info.result
             info = info.result[1:-1]
             info = info.split(",")
             self.conn[friend_name] = (info, -1)
-        
+
         for i in self.flist:
             friend_name = i[:-4]
             RSA_friend = crypto.load_friend(self.name, friend_name)
