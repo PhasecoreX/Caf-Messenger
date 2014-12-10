@@ -9,22 +9,36 @@
 #   idlib
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-from twisted.internet import tksupport, reactor, protocol, endpoints
-from twisted.internet.protocol import ClientFactory
-from twisted.protocols import basic
 import os
 import socket
 import time
-
+import sys
+import ipgetter
+import argparse
+import crypto.crypto_controller as crypto_controller
 from gui.CafeLoginFrame import LoginFrame
 from gui.CafeMainFrame import MainFrame
-import cPickle as pickle
+from twisted.internet import tksupport, reactor, protocol, endpoints
+from twisted.internet.protocol import ClientFactory
+from twisted.protocols import basic
+from twisted.python import log
 
-HOST1 = '148.61.162.116'
-HOST2 = '148.61.162.115'
+from kademlia.network import Server
+
+log.startLogging(sys.stdout)
+
+parser = argparse.ArgumentParser(description="Python Chat, sunny side up.")
+parser.add_argument('--bootstrap', dest='bootUrlIp',
+                    default='hook.do.royalaid.me', type=str,
+                    help='The url or IP used to bootstrap this node')
+
+args = parser.parse_args()
+
 PORT = 1025
-
+DHTPORT = 2233
+THISIP = ipgetter.myip()
+BOOTURL = args.bootUrlIp
+publicKey = None
 
 class RSAObject():
 
@@ -55,14 +69,6 @@ class Greeter(basic.LineReceiver):
 
     def lineReceived(self, packet):
         top.handle_packet(packet)
-
-        """
-        print "Incoming:\n" + line
-        key = b'01234567890123450123456789012345'
-        pmsg = crypto.decrypt_message(key, line)
-        print "Decrypted:\n" + pmsg + "\n"
-        top.append_message("Server_Echo", pmsg)
-        """
 
     def connectionMade(self):
         print "Connection made to friend!\n"
@@ -117,57 +123,33 @@ class PubFactory(protocol.Factory):
     def buildProtocol(self, addr):
         return PubProtocol(self)
 
+
+def bootstrapDone(found, server):
+    server.set(publicKey, "(" + THISIP + ',' + str(PORT) + ")")
+
 if __name__ == "__main__":
-    print socket.gethostname()
-    host = socket.gethostbyname(socket.gethostname())
-    print host
-    print "Accepted IP's: " + HOST1 + " or " + HOST2
-    if host == HOST1:
-        friend = HOST2
-        print "Welcome! This program will attempt to connect to " + friend
+    dhtServer = Server()
+    if socket.gethostbyname(BOOTURL) == THISIP:
+        dhtServer.listen(DHTPORT)
+        dhtServer.bootstrap([('127.0.0.1', DHTPORT)])
     else:
-        if host == HOST2:
-            friend = HOST1
-            print "Welcome! This program will attempt to connect to " + friend
-        else:
-            print "This is not a usable computer for testing."
-            print "Please change the predetermined ip addresses at the top."
+        dhtServer.listen(DHTPORT+10)
+        this = RSAObject()
+        top = LoginFrame(this)
+        top.mainloop()
+        if this.get() is None:
             quit()
-
-
-    this = RSAObject()
-    top = LoginFrame(this)
-    top.mainloop()
-    if this.get() is None:
-        quit()
-
-    factory = GreeterFactory()
-    connPort = PORT
-    routerNode = False
-
-    """
-    # Setup intial routing node
-    if (not os.path.isfile('tmpFile')):
-        routerNode = True
-        ser = endpoints.serverFromString(reactor, "tcp:0").listen(
-            PubFactory()).result
-        #  TODO Error Handling
-        f = open('tmpFile', 'w')
-        f.write(str(ser.getHost().port))
-        f.close()
-
-    # Connect to existing routing node
-    f = open('tmpFile', 'r')
-    connPort = int(f.readline())
-    f.close()
-    # TODO Error handling
-    """
-
-    reactor.listenTCP(PORT, GreeterFactory())
-    conn = {}
-    # conn = reactor.connectTCP(friend, PORT, GreeterFactory())
-    top = MainFrame(None, conn, this.get(), this.get_name())
-    tksupport.install(top)
+        bootip = socket.gethostbyname(BOOTURL)
+        publicKey = crypto_controller.get_public_key_string(this.get())
+        dhtServer.bootstrap([(bootip, DHTPORT)]).addCallback(bootstrapDone,
+                                                             dhtServer)
+        factory = GreeterFactory()
+        connPort = PORT
+        tmpReactor = reactor.listenTCP(PORT, GreeterFactory())
+        print THISIP + ': ' + str(PORT)
+        if socket.gethostbyname(BOOTURL):
+            print socket.gethostbyname(BOOTURL)
+        conn = {}
+        top = MainFrame(None, conn, this.get(), this.get_name())
+        tksupport.install(top)
     reactor.run()
-    if routerNode:
-        os.remove('tmpFile')
