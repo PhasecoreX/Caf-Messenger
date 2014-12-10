@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_crypto.py
+#  hdd.py
 #
 #  Copyright 2014 Ryan Foster <phasecorex@gmail.com>
 #
@@ -25,16 +25,19 @@
 
 Functions to manage hard drive access.
 """
-
 import os
 import shutil
-PRIVATE_KEY = "user.pem"
-# No support for Windows just yet...
-# We would be saving in %User%\AppData\Roaming\cafe
+import sys
+
+# Set up default (Linux) values for variables
 HOME_DIR = os.path.expanduser("~/.config/cafe")
-# We will put an if statement for "\" Windows paths
 SLASH = "/"
-# Other stuff
+# Now, change variables if we are on a different OS
+if sys.platform.startswith('win32'):
+    HOME_DIR = os.path.expanduser("~\\AppData\\Roaming\\cafe")
+    SLASH = "\\"
+# Other stuff that won't change between different OS
+PRIVATE_KEY = "user.pem"
 FRIENDS = "friends"
 F_END = ".pem"
 
