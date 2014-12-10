@@ -106,7 +106,8 @@ class MainFrame(tk.Tk):
         """
         print "Got a packet to handle!"
         p_type = crypto.json_get_packet_type(packet)
-        c_id = crypto.json_get_convo_id(packet)
+        c_id = int(crypto.json_get_convo_id(packet))
+        print c_id
 
         if p_type == "M":
             print "M Type Packet received."

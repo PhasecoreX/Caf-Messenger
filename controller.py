@@ -17,8 +17,8 @@ import time
 from gui.CafeLoginFrame import LoginFrame
 from gui.CafeMainFrame import MainFrame
 import cPickle as pickle
-HOST1 = '127.0.1.1'
-HOST2 = '127.0.1.1'
+HOST1 = '148.61.162.116'
+HOST2 = '148.61.162.115'
 PORT = 1025
 
 
