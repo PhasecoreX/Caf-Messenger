@@ -13,21 +13,21 @@ import time
 import sys
 import ipgetter
 import argparse
-
+import crypto.crypto_controller as crypto_controller
+from gui.CafeLoginFrame import LoginFrame
+from gui.CafeMainFrame import MainFrame
 from twisted.internet import tksupport, reactor, protocol, endpoints
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols import basic
 from twisted.python import log
-
-import os
 
 from kademlia.network import Server
 
 log.startLogging(sys.stdout)
 
 parser = argparse.ArgumentParser(description="Python Chat, sunny side up.")
-parser.add_argument('--bootstrap', dest='bootUrlIp', 
-                    default='hook.do.royalaid.me', type=str, 
+parser.add_argument('--bootstrap', dest='bootUrlIp',
+                    default='hook.do.royalaid.me', type=str,
                     help='The url or IP used to bootstrap this node')
 
 args = parser.parse_args()
@@ -36,7 +36,7 @@ PORT = 1025
 DHTPORT = 2233
 THISIP = ipgetter.myip()
 BOOTURL = args.bootUrlIp
-
+publicKey = None
 
 class RSAObject():
 
@@ -125,25 +125,25 @@ class PubFactory(protocol.Factory):
 
 
 def bootstrapDone(found, server):
-    server.set("publicKey", "(addr.port)") #TODO Add real vals
+    server.set(publicKey, "(" + THISIP + ',' + str(PORT) + ")")
 
 if __name__ == "__main__":
 
     dhtServer = Server()
     if socket.gethostbyname(BOOTURL) == THISIP:
         dhtServer.listen(DHTPORT)
-        dhtServer.bootstrap([('127.0.0.1',DHTPORT)])
+        dhtServer.bootstrap([('127.0.0.1', DHTPORT)])
     else:
         dhtServer.listen(DHTPORT+10)
-        bootip = socket.gethostbyname(BOOTURL)
-        dhtServer.bootstrap([(bootip, DHTPORT)]).addCallback(bootstrapDone, 
-                                                             dhtServer)
         this = RSAObject()
         top = LoginFrame(this)
         top.mainloop()
         if this.get() is None:
             quit()
-
+        bootip = socket.gethostbyname(BOOTURL)
+        publicKey = crypto_controller.get_public_key_string(this.get())
+        dhtServer.bootstrap([(bootip, DHTPORT)]).addCallback(bootstrapDone,
+                                                             dhtServer)
         factory = GreeterFactory()
         connPort = PORT
         tmpReactor = reactor.listenTCP(PORT, GreeterFactory())

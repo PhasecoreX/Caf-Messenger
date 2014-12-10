@@ -21,7 +21,6 @@
 #  MA 02110-1301, USA.
 #
 #
-from hachoir_parser.network.tcpdump import Packet
 """packet_gen.py
 
 Makes encryption and packet generation even easier!
