@@ -150,6 +150,6 @@ if __name__ == "__main__":
         if socket.gethostbyname(BOOTURL):
             print socket.gethostbyname(BOOTURL)
         conn = {}
-        top = MainFrame(None, conn, this.get(), this.get_name())
+        top = MainFrame(dhtServer, conn, this.get(), this.get_name())
         tksupport.install(top)
     reactor.run()

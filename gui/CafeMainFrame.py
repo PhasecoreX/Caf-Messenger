@@ -192,6 +192,8 @@ class MainFrame(tk.Tk):
             print "Not a friend! (tossed)"
             return 'break'
 
+
+
     def send_chat(self, name):
         # Are we already chatting with that user?
         for i in self.conn:
@@ -207,13 +209,10 @@ class MainFrame(tk.Tk):
         t = ChatPanel(self, self.name, name, convo_id,
                       None, sym_key)
         self.winlist[convo_id] = t
-        # TODO Get ip info from DHT, populate connection list
-        #
-        # Add a mechanic to deny if the person is offline
-        # self.conn[name] = {reactor.connectTCP(ip, PORT, GreeterFactory()), convo_id}
-        # 
-        
-        self.conn[name] = ("Some stuff", convo_id)
+        reactor.connectTCP(self.conn[name][0][0], 
+                           self.conn[name][0][1], 
+                           GreeterFactory())
+        self.conn[name] = (self.conn[name][0], convo_id)
         
         friend_RSA = crypto.load_friend(self.name, name)
         self.send_auth_packet(convo_id, sym_key, friend_RSA)
@@ -224,6 +223,10 @@ class MainFrame(tk.Tk):
         t = ChatPanel(self, self.name, name, convo_id,
                       their_number, proposed_key)
         self.winlist[convo_id] = t
+        reactor.connectTCP(self.conn[name][0][0], 
+                           self.conn[name][0][1], 
+                           GreeterFactory())
+        self.conn[name] = (self.conn[name][0], convo_id)
         return convo_id
 
     def generate_convo_id(self):
@@ -311,9 +314,20 @@ class MainFrame(tk.Tk):
     def populate_connections_list(self):
         """
         """
+        
+        def friend_ip_connector(info):
+            print "THIS IS THE STUFF---------------------"
+            print info.result
+            info = info.result[1:-1]
+            info = info.split(",")
+            self.conn[friend_name] = (info, -1)
+        
         for i in self.flist:
             friend_name = i[:-4]
-            self.conn[friend_name] = (None, -1)
+            RSA_friend = crypto.load_friend(self.name, friend_name)
+            publickey = crypto.get_public_key_string(RSA_friend)
+            info = self.dhtServer.get(publickey)
+            info.addCallback(friend_ip_connector)
 
     def print_connections(self):
         """
@@ -322,7 +336,7 @@ class MainFrame(tk.Tk):
             print i + " " + str(self.conn[i][1])
         print ""
 
-    def __init__(self, controller, conn, myKeys, name, *args, **kwargs):
+    def __init__(self, dhtServer, conn, myKeys, name, *args, **kwargs):
         """
         """
         self.name = name
@@ -332,7 +346,7 @@ class MainFrame(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
         self.chatCount = 0
         self.winlist = {}
-        self.controller = controller
+        self.dhtServer = dhtServer
         self.container_frame = tk.Frame(self)
         self.menubar = MainMenu(self)
         self.flist = crypto.get_friend_list(self.name)
