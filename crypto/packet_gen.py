@@ -33,7 +33,6 @@ import json
 from crypto import encrypt_message, sign, encrypt_auth, verify,\
     decrypt_message, decrypt_auth, get_public_key_string
 from packet import DecryptedPacketS, DecryptedPacketA
-import cPickle as pickle
 
 
 def gen_packet_s(packet_type, source, dest, convo_id, data, encrypt_key,

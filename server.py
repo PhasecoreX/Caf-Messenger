@@ -3,6 +3,9 @@ from twisted.protocols import basic
 
 
 class PubProtocol(basic.LineReceiver):
+
+    """A simple echo server"""
+
     def __init__(self, factory):
         self.clients = {}
         self.factory = factory
@@ -20,7 +23,9 @@ class PubProtocol(basic.LineReceiver):
         for c in self.factory.clients:
             c.transport.write(line)
 
+
 class PubFactory(protocol.Factory):
+
     def __init__(self):
         self.clients = set()
 

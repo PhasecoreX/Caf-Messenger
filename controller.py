@@ -9,22 +9,20 @@
 #   idlib
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-import os
-import socket
-import time
-import sys
-import ipgetter
-import argparse
-import crypto.crypto_controller as crypto_controller
-from gui.CafeLoginFrame import LoginFrame
-from gui.CafeMainFrame import MainFrame
-from twisted.internet import tksupport, reactor, protocol, endpoints
+from kademlia.network import Server
+from twisted.internet import tksupport, reactor, protocol
 from twisted.internet.protocol import ClientFactory
 from twisted.protocols import basic
 from twisted.python import log
+import argparse
+import ipgetter
+import socket
+import sys
+import time
 
-from kademlia.network import Server
-
+from gui.CafeLoginFrame import LoginFrame
+from gui.CafeMainFrame import MainFrame
+import crypto.crypto_controller as crypto_controller
 log.startLogging(sys.stdout)
 
 parser = argparse.ArgumentParser(description="Python Chat, sunny side up.")
@@ -39,6 +37,7 @@ DHTPORT = 2233
 THISIP = ipgetter.myip()
 BOOTURL = args.bootUrlIp
 publicKey = None
+
 
 class RSAObject():
 
@@ -133,7 +132,7 @@ if __name__ == "__main__":
         dhtServer.listen(DHTPORT)
         dhtServer.bootstrap([('127.0.0.1', DHTPORT)])
     else:
-        dhtServer.listen(DHTPORT+10)
+        dhtServer.listen(DHTPORT + 10)
         this = RSAObject()
         top = LoginFrame(this)
         top.mainloop()

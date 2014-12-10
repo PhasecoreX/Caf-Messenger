@@ -9,13 +9,13 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import Tkinter as tk
 from idlelib.WidgetRedirector import WidgetRedirector
+import Tkinter as tk
+
 
 class ReadOnlyText(tk.Text):
 
-    """
-    """
+    """Used for making a text field read-only, yet able to be copied from"""
 
     def __init__(self, *args, **kwargs):
         """
