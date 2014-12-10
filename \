@@ -124,14 +124,11 @@ class PubFactory(protocol.Factory):
 
 
 def bootstrapDone(top, server, rsaObj):
-    print "Key insterting"
     server.set(publicKey, "(" + THISIP + ',' + str(PORT) + ")")
-    print "Key set"
     conn = {}
-    top = MainFrame()
-    top.start(server, conn, rsaObj.get(), rsaObj.get_name())
+    top = MainFrame.start(server, conn, rsaObj.get(), rsaObj.get_name())
     tksupport.install(top)
-
+    return top
 
 if __name__ == "__main__":
     dhtServer = Server()
